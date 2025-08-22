@@ -37,6 +37,13 @@
                                                         <userDefinedRuntimeAttribute type="boolean" keyPath="layer.masksToBounds" value="YES"/>
                                                     </userDefinedRuntimeAttributes>
                                                 </imageView>
+                                                <view clipsSubviews="YES" contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="tW9-Vj-Gq1">
+                                                    <rect key="frame" x="16" y="166" width="382" height="30"/>
+                                                    <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+                                                    <constraints>
+                                                        <constraint firstAttribute="height" constant="30" id="dCx-XL-7cW"/>
+                                                    </constraints>
+                                                </view>
                                                 <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="2y9-ag-15W" userLabel="Like Button">
                                                     <rect key="frame" x="354" y="4" width="44" height="44"/>
                                                     <accessibility key="accessibilityConfiguration">
@@ -60,17 +67,21 @@
                                                 <constraint firstItem="8m6-vS-XIi" firstAttribute="leading" secondItem="n5M-33-C07" secondAttribute="leading" constant="8" id="4fq-u1-33R"/>
                                                 <constraint firstItem="2y9-ag-15W" firstAttribute="trailing" secondItem="n5M-33-C07" secondAttribute="trailing" id="BOl-Dw-jV0"/>
                                                 <constraint firstAttribute="bottom" secondItem="n5M-33-C07" secondAttribute="bottom" constant="4" id="BoS-hr-xHo"/>
+                                                <constraint firstItem="tW9-Vj-Gq1" firstAttribute="leading" secondItem="n5M-33-C07" secondAttribute="leading" id="FO9-fO-Cu5"/>
                                                 <constraint firstItem="8m6-vS-XIi" firstAttribute="bottom" secondItem="n5M-33-C07" secondAttribute="bottom" constant="-8" id="Fmy-RY-s43"/>
                                                 <constraint firstItem="n5M-33-C07" firstAttribute="trailing" relation="greaterThanOrEqual" secondItem="8m6-vS-XIi" secondAttribute="trailing" constant="8" id="Vob-Jz-Gfs"/>
                                                 <constraint firstItem="n5M-33-C07" firstAttribute="leading" secondItem="xEi-KB-smx" secondAttribute="leading" constant="16" id="bMK-BE-ejH"/>
                                                 <constraint firstItem="2y9-ag-15W" firstAttribute="top" secondItem="n5M-33-C07" secondAttribute="top" id="gwV-MV-yCl"/>
                                                 <constraint firstItem="n5M-33-C07" firstAttribute="top" secondItem="xEi-KB-smx" secondAttribute="top" constant="4" id="n3q-BU-Mkf"/>
+                                                <constraint firstItem="tW9-Vj-Gq1" firstAttribute="trailing" secondItem="n5M-33-C07" secondAttribute="trailing" id="n4O-YU-ycF"/>
                                                 <constraint firstAttribute="trailing" secondItem="n5M-33-C07" secondAttribute="trailing" constant="16" id="tRj-zg-TLN"/>
+                                                <constraint firstItem="tW9-Vj-Gq1" firstAttribute="bottom" secondItem="n5M-33-C07" secondAttribute="bottom" id="yf1-sV-Oy2"/>
                                             </constraints>
                                         </tableViewCellContentView>
                                         <color key="backgroundColor" name="YP Background"/>
                                         <connections>
                                             <outlet property="dataLabel" destination="8m6-vS-XIi" id="ZO9-Ka-ees"/>
+                                            <outlet property="gradientView" destination="tW9-Vj-Gq1" id="xtY-PX-SgR"/>
                                             <outlet property="imageInCell" destination="n5M-33-C07" id="259-DM-Ms9"/>
                                             <outlet property="likeButton" destination="2y9-ag-15W" id="dNd-Ud-ut5"/>
                                         </connections>
