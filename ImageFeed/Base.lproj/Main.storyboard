@@ -185,7 +185,6 @@
                                             <outlet property="gradientView" destination="tW9-Vj-Gq1" id="xtY-PX-SgR"/>
                                             <outlet property="imageInCell" destination="n5M-33-C07" id="259-DM-Ms9"/>
                                             <outlet property="likeButton" destination="2y9-ag-15W" id="dNd-Ud-ut5"/>
-                                            <segue destination="53L-IV-CQw" kind="show" id="nd4-O3-c8N"/>
                                         </connections>
                                     </tableViewCell>
                                 </prototypes>
@@ -207,6 +206,7 @@
                     <navigationItem key="navigationItem" id="cTs-Wm-mvA"/>
                     <connections>
                         <outlet property="tableView" destination="Odq-1y-970" id="asn-4x-X0x"/>
+                        <segue destination="53L-IV-CQw" kind="show" identifier="ShowSingleImage" id="Qrs-zG-gRS"/>
                     </connections>
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="dkx-z0-nzr" sceneMemberID="firstResponder"/>
