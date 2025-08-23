@@ -17,13 +17,14 @@
                         <rect key="frame" x="0.0" y="0.0" width="393" height="49"/>
                         <autoresizingMask key="autoresizingMask"/>
                         <color key="backgroundColor" name="YP Black"/>
+                        <color key="tintColor" name="YP White"/>
                         <color key="selectedImageTintColor" name="YP White"/>
                         <tabBarAppearance key="standardAppearance">
                             <color key="backgroundColor" name="YP Black"/>
                         </tabBarAppearance>
                     </tabBar>
                     <connections>
-                        <segue destination="BYZ-38-t0r" kind="relationship" relationship="viewControllers" id="lyX-XD-MwN"/>
+                        <segue destination="9Yv-UN-fU6" kind="relationship" relationship="viewControllers" id="lyX-XD-MwN"/>
                         <segue destination="crz-uJ-gc9" kind="relationship" relationship="viewControllers" id="nto-Yk-puI"/>
                     </connections>
                 </tabBarController>
@@ -184,6 +185,7 @@
                                             <outlet property="gradientView" destination="tW9-Vj-Gq1" id="xtY-PX-SgR"/>
                                             <outlet property="imageInCell" destination="n5M-33-C07" id="259-DM-Ms9"/>
                                             <outlet property="likeButton" destination="2y9-ag-15W" id="dNd-Ud-ut5"/>
+                                            <segue destination="53L-IV-CQw" kind="show" id="nd4-O3-c8N"/>
                                         </connections>
                                     </tableViewCell>
                                 </prototypes>
@@ -202,14 +204,69 @@
                             <constraint firstAttribute="trailing" secondItem="Odq-1y-970" secondAttribute="trailing" id="bsn-X8-N0J"/>
                         </constraints>
                     </view>
-                    <tabBarItem key="tabBarItem" title="" image="tab_editorial_active" id="aNL-kk-3DP"/>
+                    <navigationItem key="navigationItem" id="cTs-Wm-mvA"/>
                     <connections>
                         <outlet property="tableView" destination="Odq-1y-970" id="asn-4x-X0x"/>
                     </connections>
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="dkx-z0-nzr" sceneMemberID="firstResponder"/>
             </objects>
-            <point key="canvasLocation" x="-3807" y="-1824"/>
+            <point key="canvasLocation" x="-2897.1014492753625" y="-1824.1071428571427"/>
+        </scene>
+        <!--Navigation Controller-->
+        <scene sceneID="HPq-GS-Ep1">
+            <objects>
+                <navigationController automaticallyAdjustsScrollViewInsets="NO" id="9Yv-UN-fU6" sceneMemberID="viewController">
+                    <tabBarItem key="tabBarItem" title="" image="tab_editorial_active" id="aNL-kk-3DP"/>
+                    <toolbarItems/>
+                    <navigationBar key="navigationBar" contentMode="scaleToFill" id="PTU-cp-obU">
+                        <rect key="frame" x="0.0" y="96" width="414" height="44"/>
+                        <autoresizingMask key="autoresizingMask"/>
+                        <color key="backgroundColor" name="YP Black"/>
+                        <color key="tintColor" name="YP White"/>
+                        <color key="barTintColor" name="YP White"/>
+                        <navigationBarAppearance key="standardAppearance">
+                            <color key="backgroundColor" name="YP Black"/>
+                        </navigationBarAppearance>
+                    </navigationBar>
+                    <nil name="viewControllers"/>
+                    <connections>
+                        <segue destination="BYZ-38-t0r" kind="relationship" relationship="rootViewController" id="pOb-4Q-Rhh"/>
+                    </connections>
+                </navigationController>
+                <placeholder placeholderIdentifier="IBFirstResponder" id="I1V-zP-nkU" userLabel="First Responder" customClass="UIResponder" sceneMemberID="firstResponder"/>
+            </objects>
+            <point key="canvasLocation" x="-3807.2463768115945" y="-1824.1071428571427"/>
+        </scene>
+        <!--Single Image-->
+        <scene sceneID="GSq-Dt-nBh">
+            <objects>
+                <viewController title="Single Image" id="53L-IV-CQw" customClass="SingleImageViewController" customModule="ImageFeed" customModuleProvider="target" sceneMemberID="viewController">
+                    <view key="view" contentMode="scaleToFill" id="XXr-Bn-bNZ">
+                        <rect key="frame" x="0.0" y="0.0" width="414" height="896"/>
+                        <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
+                        <subviews>
+                            <imageView clipsSubviews="YES" userInteractionEnabled="NO" contentMode="scaleAspectFit" horizontalHuggingPriority="251" verticalHuggingPriority="251" image="0" translatesAutoresizingMaskIntoConstraints="NO" id="XC9-Dg-84x">
+                                <rect key="frame" x="0.0" y="140" width="414" height="639"/>
+                            </imageView>
+                        </subviews>
+                        <viewLayoutGuide key="safeArea" id="2r2-Hk-YRw"/>
+                        <color key="backgroundColor" name="YP Black"/>
+                        <constraints>
+                            <constraint firstItem="2r2-Hk-YRw" firstAttribute="bottom" secondItem="XC9-Dg-84x" secondAttribute="bottom" id="JQ2-PZ-SBy"/>
+                            <constraint firstItem="XC9-Dg-84x" firstAttribute="leading" secondItem="2r2-Hk-YRw" secondAttribute="leading" id="WzA-DW-2xm"/>
+                            <constraint firstItem="XC9-Dg-84x" firstAttribute="top" secondItem="2r2-Hk-YRw" secondAttribute="top" id="bSI-Hr-xbQ"/>
+                            <constraint firstItem="2r2-Hk-YRw" firstAttribute="trailing" secondItem="XC9-Dg-84x" secondAttribute="trailing" id="uz3-JF-cBN"/>
+                        </constraints>
+                    </view>
+                    <navigationItem key="navigationItem" id="IkS-ap-gbY"/>
+                    <connections>
+                        <outlet property="imageView" destination="XC9-Dg-84x" id="8Yh-t8-hZu"/>
+                    </connections>
+                </viewController>
+                <placeholder placeholderIdentifier="IBFirstResponder" id="vPd-7c-JiZ" userLabel="First Responder" customClass="UIResponder" sceneMemberID="firstResponder"/>
+            </objects>
+            <point key="canvasLocation" x="-1991" y="-1824"/>
         </scene>
     </scenes>
     <resources>
