@@ -236,6 +236,18 @@
                                     <outlet property="delegate" destination="53L-IV-CQw" id="53h-as-VCB"/>
                                 </connections>
                             </scrollView>
+                            <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="mMW-oP-SUg" userLabel="Share Button">
+                                <rect key="frame" x="182" y="795" width="50" height="50"/>
+                                <constraints>
+                                    <constraint firstAttribute="height" constant="50" id="EtM-Zg-8qQ"/>
+                                    <constraint firstAttribute="width" constant="50" id="KUq-cO-hFu"/>
+                                </constraints>
+                                <inset key="imageEdgeInsets" minX="0.0" minY="0.0" maxX="2.2250738585072014e-308" maxY="0.0"/>
+                                <state key="normal" image="share_button"/>
+                                <connections>
+                                    <action selector="didTapShareButton:" destination="53L-IV-CQw" eventType="touchUpInside" id="IrO-Do-xeX"/>
+                                </connections>
+                            </button>
                             <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="l9i-LS-OX3">
                                 <rect key="frame" x="8" y="59" width="24" height="24"/>
                                 <constraints>
@@ -253,10 +265,12 @@
                         <viewLayoutGuide key="safeArea" id="2r2-Hk-YRw"/>
                         <color key="backgroundColor" name="YP Black"/>
                         <constraints>
+                            <constraint firstItem="2r2-Hk-YRw" firstAttribute="bottom" secondItem="mMW-oP-SUg" secondAttribute="bottom" constant="17" id="2R4-v7-6wF"/>
                             <constraint firstItem="l9i-LS-OX3" firstAttribute="top" secondItem="2r2-Hk-YRw" secondAttribute="top" constant="11" id="8av-Vx-YRc"/>
                             <constraint firstItem="1FR-9q-7De" firstAttribute="trailing" secondItem="2r2-Hk-YRw" secondAttribute="trailing" id="Av5-G3-ic0"/>
                             <constraint firstItem="1FR-9q-7De" firstAttribute="top" secondItem="XXr-Bn-bNZ" secondAttribute="top" id="Izf-aM-ptB"/>
                             <constraint firstItem="l9i-LS-OX3" firstAttribute="leading" secondItem="2r2-Hk-YRw" secondAttribute="leading" constant="8" id="Lni-fE-Bsz"/>
+                            <constraint firstItem="mMW-oP-SUg" firstAttribute="centerX" secondItem="2r2-Hk-YRw" secondAttribute="centerX" id="Mxg-mv-Ylg"/>
                             <constraint firstAttribute="bottom" secondItem="1FR-9q-7De" secondAttribute="bottom" id="Shy-7l-PEi"/>
                             <constraint firstItem="1FR-9q-7De" firstAttribute="leading" secondItem="2r2-Hk-YRw" secondAttribute="leading" id="vn8-x0-LM4"/>
                         </constraints>
@@ -266,6 +280,7 @@
                         <outlet property="backButton" destination="l9i-LS-OX3" id="eAe-eX-dLv"/>
                         <outlet property="imageView" destination="XC9-Dg-84x" id="8Yh-t8-hZu"/>
                         <outlet property="scrollView" destination="1FR-9q-7De" id="qfv-KC-ASQ"/>
+                        <outlet property="shareButton" destination="mMW-oP-SUg" id="16x-ys-j69"/>
                     </connections>
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="vPd-7c-JiZ" userLabel="First Responder" customClass="UIResponder" sceneMemberID="firstResponder"/>
@@ -279,6 +294,7 @@
         <image name="exitButton" width="44" height="44"/>
         <image name="like_button_on" width="44" height="44"/>
         <image name="photoProfile" width="70" height="70"/>
+        <image name="share_button" width="50.5" height="50"/>
         <image name="tab_editorial_active" width="30" height="30"/>
         <image name="tab_profile_active" width="30" height="30"/>
         <namedColor name="YP Background">
