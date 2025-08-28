@@ -25,6 +25,8 @@ final class SingleImageViewController: UIViewController {
         guard let image else { return }
         let share = UIActivityViewController(activityItems: [image], applicationActivities: nil)
         present(share, animated: true, completion: nil)
+        
+        share.overrideUserInterfaceStyle = .dark
     }
     
     override func viewDidLoad() {
