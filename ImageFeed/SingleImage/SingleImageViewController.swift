@@ -4,8 +4,7 @@ import UIKit
 final class SingleImageViewController: UIViewController {
     var image: UIImage? {
         didSet {
-            guard isViewLoaded else { return }
-            guard let image else { return }
+            guard let image, isViewLoaded else { return }
             imageView.image = image
             
             rescaleAndCenterImageInScrollView(image: image)
@@ -61,6 +60,6 @@ final class SingleImageViewController: UIViewController {
 
 extension SingleImageViewController: UIScrollViewDelegate {
     func viewForZooming(in scrollView: UIScrollView) -> UIView? {
-        return imageView
+        imageView
     }
 }
