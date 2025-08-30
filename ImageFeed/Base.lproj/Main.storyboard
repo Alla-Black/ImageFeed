@@ -24,29 +24,13 @@
                         </tabBarAppearance>
                     </tabBar>
                     <connections>
-                        <segue destination="crz-uJ-gc9" kind="relationship" relationship="viewControllers" id="nto-Yk-puI"/>
                         <segue destination="BYZ-38-t0r" kind="relationship" relationship="viewControllers" id="g5E-Au-tY0"/>
+                        <segue destination="crz-uJ-gc9" kind="relationship" relationship="viewControllers" id="Udq-47-X3O"/>
                     </connections>
                 </tabBarController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="aPW-Yv-SNx" userLabel="First Responder" customClass="UIResponder" sceneMemberID="firstResponder"/>
             </objects>
             <point key="canvasLocation" x="-4841" y="-1473"/>
-        </scene>
-        <!--Profile-->
-        <scene sceneID="qGx-ph-bkO">
-            <objects>
-                <viewController title="Profile" id="crz-uJ-gc9" customClass="ProfileViewController" customModule="ImageFeed" customModuleProvider="target" sceneMemberID="viewController">
-                    <view key="view" contentMode="scaleToFill" id="JmY-T3-dEJ">
-                        <rect key="frame" x="0.0" y="0.0" width="414" height="896"/>
-                        <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
-                        <viewLayoutGuide key="safeArea" id="EFw-xD-Axl"/>
-                        <color key="backgroundColor" name="YP Black"/>
-                    </view>
-                    <tabBarItem key="tabBarItem" title="" image="tab_profile_active" id="Byv-Ym-cVQ"/>
-                </viewController>
-                <placeholder placeholderIdentifier="IBFirstResponder" id="hlI-Pl-2aO" userLabel="First Responder" customClass="UIResponder" sceneMemberID="firstResponder"/>
-            </objects>
-            <point key="canvasLocation" x="-3807" y="-1172"/>
         </scene>
         <!--ImageList-->
         <scene sceneID="tne-QT-ifu">
@@ -151,6 +135,22 @@
                 <placeholder placeholderIdentifier="IBFirstResponder" id="dkx-z0-nzr" sceneMemberID="firstResponder"/>
             </objects>
             <point key="canvasLocation" x="-3807" y="-1850"/>
+        </scene>
+        <!--Profile-->
+        <scene sceneID="qGx-ph-bkO">
+            <objects>
+                <viewController title="Profile" id="crz-uJ-gc9" customClass="ProfileViewController" customModule="ImageFeed" customModuleProvider="target" sceneMemberID="viewController">
+                    <view key="view" contentMode="scaleToFill" id="JmY-T3-dEJ">
+                        <rect key="frame" x="0.0" y="0.0" width="414" height="896"/>
+                        <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
+                        <viewLayoutGuide key="safeArea" id="EFw-xD-Axl"/>
+                        <color key="backgroundColor" name="YP Black"/>
+                    </view>
+                    <tabBarItem key="tabBarItem" title="" image="tab_profile_active" id="Byv-Ym-cVQ"/>
+                </viewController>
+                <placeholder placeholderIdentifier="IBFirstResponder" id="hlI-Pl-2aO" userLabel="First Responder" customClass="UIResponder" sceneMemberID="firstResponder"/>
+            </objects>
+            <point key="canvasLocation" x="-3807" y="-1172"/>
         </scene>
         <!--Single Image-->
         <scene sceneID="GSq-Dt-nBh">
