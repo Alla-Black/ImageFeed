@@ -37,7 +37,7 @@ final class WebViewViewController: UIViewController {
         guard let url = urlComponents.url else {
             return
         }
-        
+        print(url)
         let request = URLRequest(url: url)
         webView.load(request)
     }

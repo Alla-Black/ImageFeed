@@ -6,6 +6,7 @@ final class AuthViewController: UIViewController {
     @IBOutlet weak var loginButton: UIButton!
     
     private let showWebViewSegueIdentifier = "ShowWebView"
+    private let oauthService = OAuth2Service()
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -39,7 +40,29 @@ final class AuthViewController: UIViewController {
 extension AuthViewController: WebViewViewControllerDelegate { func webViewViewController(_ vc: WebViewViewController, didAuthenticateWithCode code: String) {
     print("Получили код авторизации: \(code)")
     
-    //TODO: process code
+    loginButton.isEnabled = false
+    
+    oauthService.fetchOAuthToken(code: code, completion: { [weak self] result in
+        guard let self else { return }
+        
+        switch result {
+        case .success(let token):
+            self.loginButton.isEnabled = true
+            
+            navigationController?.popViewController(animated: true) // ДОДЕЛАТЬ !
+            print("Токен: \(token)")
+            
+        case .failure(let error):
+            self.loginButton.isEnabled = true
+            print(error)
+            
+            let alert = UIAlertController(title: "Что-то пошло не так(", message: "Не удалось войти в систему", preferredStyle: .alert)
+            alert.addAction(UIAlertAction(title: "OK", style: .default))
+            if self.presentedViewController == nil {
+                self.present(alert, animated: true)
+            }
+    }
+    })
 }
     func webViewViewControllerDidCancel(_ vc: WebViewViewController) {
         print("Пользователь отменил авторизацию")
