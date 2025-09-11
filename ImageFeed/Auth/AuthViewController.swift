@@ -1,12 +1,18 @@
 import Foundation
 import UIKit
 
+protocol AuthViewControllerDelegate: AnyObject {
+    func didAuthenticate(_ vc: AuthViewController)
+}
+
 final class AuthViewController: UIViewController {
     
     @IBOutlet weak var loginButton: UIButton!
     
     private let showWebViewSegueIdentifier = "ShowWebView"
     private let oauthService = OAuth2Service()
+    
+    weak var delegate: AuthViewControllerDelegate?
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -37,20 +43,25 @@ final class AuthViewController: UIViewController {
     }
 }
 
-extension AuthViewController: WebViewViewControllerDelegate { func webViewViewController(_ vc: WebViewViewController, didAuthenticateWithCode code: String) {
-    print("Получили код авторизации: \(code)")
+extension AuthViewController: WebViewViewControllerDelegate {
+    func webViewViewController(_ vc: WebViewViewController, didAuthenticateWithCode code: String) {
     
-    loginButton.isEnabled = false
+        print("Получили код авторизации: \(code)")
+        
+        vc.dismiss(animated: true)
     
-    oauthService.fetchOAuthToken(code: code, completion: { [weak self] result in
+        loginButton.isEnabled = false
+    
+        oauthService.fetchOAuthToken(code: code, completion: { [weak self] result in
         guard let self else { return }
         
         switch result {
         case .success(let token):
             self.loginButton.isEnabled = true
             
-            navigationController?.popViewController(animated: true) // ДОДЕЛАТЬ !
             print("Токен: \(token)")
+            
+            self.delegate?.didAuthenticate(self)
             
         case .failure(let error):
             self.loginButton.isEnabled = true
@@ -69,3 +80,4 @@ extension AuthViewController: WebViewViewControllerDelegate { func webViewViewCo
         dismiss(animated: true)
     }
 }
+
