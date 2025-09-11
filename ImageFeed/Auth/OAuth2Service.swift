@@ -5,10 +5,12 @@ struct OAuthTokenResponseBody: Decodable {
 }
 
 final class OAuth2Service {
+    static let shared = OAuth2Service()
+    private init() {}
     
     private let tokenStorage = OAuth2TokenStorage()
     
-    func fetchOAuthToken(code: String, completion: @escaping (Result<String, Error>) -> Void) {
+    func fetchAuthToken(code: String, completion: @escaping (Result<String, Error>) -> Void) {
         guard let request = makeOAuthTokenRequest(code: code) else {
             completion(.failure(NetworkError.invalidRequest))
             return }

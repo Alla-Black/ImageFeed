@@ -10,7 +10,6 @@ final class AuthViewController: UIViewController {
     @IBOutlet weak var loginButton: UIButton!
     
     private let showWebViewSegueIdentifier = "ShowWebView"
-    private let oauthService = OAuth2Service()
     
     weak var delegate: AuthViewControllerDelegate?
     
@@ -48,32 +47,32 @@ extension AuthViewController: WebViewViewControllerDelegate {
     
         print("Получили код авторизации: \(code)")
         
-        vc.dismiss(animated: true)
+        navigationController?.popViewController(animated: true)
     
         loginButton.isEnabled = false
     
-        oauthService.fetchOAuthToken(code: code, completion: { [weak self] result in
-        guard let self else { return }
-        
-        switch result {
-        case .success(let token):
-            self.loginButton.isEnabled = true
+        OAuth2Service.shared.fetchAuthToken(code: code) { [weak self] result in
+            guard let self else { return }
             
-            print("Токен: \(token)")
+            switch result {
+            case .success(let token):
+                self.loginButton.isEnabled = true
+                
+                print("Токен: \(token)")
+                print("AuthVC: completion success → call delegate") // ПОТОМ УДАЛИ
+                self.delegate?.didAuthenticate(self)
             
-            self.delegate?.didAuthenticate(self)
-            
-        case .failure(let error):
-            self.loginButton.isEnabled = true
-            print(error)
-            
-            let alert = UIAlertController(title: "Что-то пошло не так(", message: "Не удалось войти в систему", preferredStyle: .alert)
-            alert.addAction(UIAlertAction(title: "OK", style: .default))
-            if self.presentedViewController == nil {
-                self.present(alert, animated: true)
+            case .failure(let error):
+                self.loginButton.isEnabled = true
+                print(error)
+                
+                let alert = UIAlertController(title: "Что-то пошло не так(", message: "Не удалось войти в систему", preferredStyle: .alert)
+                alert.addAction(UIAlertAction(title: "OK", style: .default))
+                if self.presentedViewController == nil {
+                    self.present(alert, animated: true)
+                }
             }
-    }
-    })
+        }
 }
     func webViewViewControllerDidCancel(_ vc: WebViewViewController) {
         print("Пользователь отменил авторизацию")
