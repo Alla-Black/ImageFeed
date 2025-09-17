@@ -1,4 +1,5 @@
 import UIKit
+import ProgressHUD
 
 protocol AuthViewControllerDelegate: AnyObject {
     func didAuthenticate(_ vc: AuthViewController)
@@ -49,8 +50,13 @@ extension AuthViewController: WebViewViewControllerDelegate {
         navigationController?.popViewController(animated: true)
     
         loginButton.isEnabled = false
+        
+        ProgressHUD.animate()
     
         OAuth2Service.shared.fetchAuthToken(code: code) { [weak self] result in
+            
+            ProgressHUD.dismiss()
+            
             guard let self else { return }
             
             switch result {
@@ -58,7 +64,6 @@ extension AuthViewController: WebViewViewControllerDelegate {
                 self.loginButton.isEnabled = true
                 
                 print("Токен: \(token)")
-                print("AuthVC: completion success → call delegate") // ПОТОМ УДАЛИ
                 self.delegate?.didAuthenticate(self)
             
             case .failure(let error):
@@ -73,6 +78,7 @@ extension AuthViewController: WebViewViewControllerDelegate {
             }
         }
 }
+    
     func webViewViewControllerDidCancel(_ vc: WebViewViewController) {
         print("Пользователь отменил авторизацию")
         dismiss(animated: true)
