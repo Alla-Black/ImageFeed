@@ -40,9 +40,9 @@ final class OAuth2Service {
     
     private func makeOAuthTokenRequest(code: String) -> URLRequest? {
         var urlComponents = URLComponents()
-        urlComponents.scheme = "https"
-        urlComponents.host = "unsplash.com"
-        urlComponents.path = "/oauth/token"
+        urlComponents.scheme = Constants.defaultScheme
+        urlComponents.host = Constants.defaultHost
+        urlComponents.path = Constants.oauthPath
         
         urlComponents.queryItems = [
             URLQueryItem(name: "client_id", value: Constants.accessKey),

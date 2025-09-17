@@ -1,4 +1,3 @@
-import Foundation
 import UIKit
 
 protocol AuthViewControllerDelegate: AnyObject {
@@ -7,7 +6,7 @@ protocol AuthViewControllerDelegate: AnyObject {
 
 final class AuthViewController: UIViewController {
     
-    @IBOutlet weak var loginButton: UIButton!
+    @IBOutlet private weak var loginButton: UIButton!
     
     private let showWebViewSegueIdentifier = "ShowWebView"
     
