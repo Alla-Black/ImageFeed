@@ -7,11 +7,39 @@ final class ProfileViewController: UIViewController {
     private var avatarImage: UIImageView?
     private var logoutButton: UIButton?
     private var profileInformation: [UIView] = []
+    private let profileService = ProfileService()
     
     override func viewDidLoad() {
         super.viewDidLoad()
         
         addViewsToScreen()
+        
+        guard let token = OAuth2TokenStorage.shared.token else {
+            print("Error: missing OAuth token")
+            return
+        }
+        
+        profileService.fetchProfile(token) { [weak self] result in
+                guard let self else { return }
+            DispatchQueue.main.async {
+                switch result {
+                case .success(let profile):
+                    self.updateProfileDetails(with: profile)
+                case .failure(let error):
+                    print("Error: \(error)")
+                }
+            }
+        }
+    }
+    
+    private func updateProfileDetails(with profile: Profile) {
+        nameLabel?.text = profile.name.isEmpty ? "Имя не указано"
+        : profile.name
+        loginName?.text = profile.loginName.isEmpty ? "@неизвестный_пользователь"
+        : profile.loginName
+        descriptionLabel?.text = (profile.bio?.isEmpty ?? true)
+        ? "Профиль не заполнен"
+        : profile.bio
     }
     
     private func addViewsToScreen() {
@@ -38,7 +66,7 @@ final class ProfileViewController: UIViewController {
         nameLabel.textColor = UIColor(named: "YP White")
         nameLabel.font = UIFont.systemFont(ofSize: 23, weight: .bold)
         
-        loginName.text = "ekaterina_nov"
+        loginName.text = "@ekaterina_nov"
         loginName.textColor = UIColor(named: "YP Gray")
         loginName.font = UIFont.systemFont(ofSize: 13, weight: .regular)
         
