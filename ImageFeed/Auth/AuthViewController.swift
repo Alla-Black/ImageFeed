@@ -49,25 +49,21 @@ extension AuthViewController: WebViewViewControllerDelegate {
         
         navigationController?.popViewController(animated: true)
     
-        loginButton.isEnabled = false
-        
-        ProgressHUD.animate()
+        UIBlockingProgressHUD.show()
     
         OAuth2Service.shared.fetchAuthToken(code: code) { [weak self] result in
             
-            ProgressHUD.dismiss()
+            UIBlockingProgressHUD.dismiss()
             
             guard let self else { return }
             
             switch result {
             case .success(let token):
-                self.loginButton.isEnabled = true
                 
                 print("Токен: \(token)")
                 self.delegate?.didAuthenticate(self)
             
             case .failure(let error):
-                self.loginButton.isEnabled = true
                 print(error)
                 
                 let alert = UIAlertController(title: "Что-то пошло не так(", message: "Не удалось войти в систему", preferredStyle: .alert)
