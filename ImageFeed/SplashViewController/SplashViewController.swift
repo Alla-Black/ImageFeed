@@ -27,16 +27,19 @@ final class SplashViewController: UIViewController {
                 guard let self else { return }
                 
                 switch result {
-                case .success:
+                case let .success(profile):
+                    ProfileImageService.shared.fetchProfileImageURL(username: profile.username) { _ in }
                     self.switchToTabBarController()
                 
-                case .failure(let error):
+                case let .failure(error):
                     print("Failed to fetch profile: \(error)")
                     break
                 }
             }
         }
     }
+    
+    
     
     private func  switchToTabBarController() {
         guard
