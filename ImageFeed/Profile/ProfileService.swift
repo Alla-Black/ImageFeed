@@ -33,32 +33,34 @@ final class ProfileService {
         task?.cancel()
         
         guard let request = makeProfileRequest(token: token) else {
+            print("[ProfileService.fetchProfile]: failure - url: https://api.unsplash.com/me - reason: \(URLError(.badURL).localizedDescription)")
+            
             completion(.failure(URLError(.badURL)))
             return
         }
         
-        let task = urlSession.data(for: request) { [weak self] result in
+        let task = urlSession.objectTask(for: request) { [weak self] (result: Result<ProfileResult, Error>) in
+            guard let self else { return }
+            
             switch result {
             case .success(let data):
-                do {
-                    let profileResult = try JSONDecoder().decode(ProfileResult.self, from: data)
-                    
+                
                     let profile = Profile(
-                        username: profileResult.username,
-                        name: "\(profileResult.first_name) \(profileResult.last_name)",
-                        loginName: "@\(profileResult.username)",
-                        bio: profileResult.bio
+                        username: data.username,
+                        name: "\(data.first_name) \(data.last_name)",
+                        loginName: "@\(data.username)",
+                        bio: data.bio
                     )
-                    self?.profile = profile
-                    completion(.success(profile))
-                } catch {
-                    completion(.failure(error))
-                }
-            
+                    
+                self.profile = profile
+                completion(.success(profile))
+                
             case .failure(let error):
+                print("[ProfileService.fetchProfile]: failure - url: \(request.url?.absoluteString ?? "") - reason: \(error.localizedDescription)")
+                
                 completion(.failure(error))
             }
-            self?.task = nil
+            self.task = nil
         }
         
         self.task = task

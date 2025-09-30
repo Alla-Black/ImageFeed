@@ -26,48 +26,41 @@ final class ProfileImageService {
         task?.cancel()
         
         guard let token = OAuth2TokenStorage.shared.token else {
-            completion(.failure(NSError(domain: "ProfileImageService", code: 401, userInfo: [NSLocalizedDescriptionKey: "Authorization token missing"])))
+            print("[ProfileImageService.fetchProfileImageURL]: failure - reason: authorisation token missing - username: \(username)")
+            
+            completion(.failure(NSError(domain: "ProfileImageService", code: 401, userInfo: [NSLocalizedDescriptionKey: "Authorisation token missing"])))
             return
         }
         
         guard let request = makeProfileImageRequest(username: username, token: token) else {
+            print("[ProfileImageService.fetchProfileImageURL]: failure - reason: \(URLError(.badURL).localizedDescription) - url: https://api.unsplash.com/users/\(username)")
+            
             completion(.failure(URLError(.badURL)))
             return
         }
         
-        let task = urlSession.data(for: request) { [weak self] result in
+        let task = urlSession.objectTask(for: request) { [weak self] (result: Result<UserResult, Error>) in
+            guard let self else { return }
+            
             switch result {
             case .success(let data):
-                guard let self else { return }
                 
-                do {
-                    let userResult = try JSONDecoder().decode(UserResult.self, from: data)
-                    
-                    DispatchQueue.main.async {
-                        self.avatarURL = userResult.profileImage.small
-                        completion(.success(userResult.profileImage.small))
+                    self.avatarURL = data.profileImage.small
+                completion(.success(data.profileImage.small))
                         
                         NotificationCenter.default
                             .post(
                                 name: ProfileImageService.didChangeNotification,
                                 object: self,
-                                userInfo: ["URL": userResult.profileImage.small]
+                                userInfo: ["URL": data.profileImage.small]
                             )
-                    }
-                } catch {
-                    DispatchQueue.main.async {
-                        completion(.failure(error))
-                    }
-                    print(error)
-                }
-                
+                    
             case .failure(let error):
-                print("[fetchProfileImageURL]: Ошибка запроса: \(error.localizedDescription)")
-                DispatchQueue.main.async {
-                    completion(.failure(error))
-                }
+                print("[ProfileImageService.fetchProfileImageURL]: failure - url: \(request.url?.absoluteString ?? "") - username: \(username) - reason: \(error.localizedDescription)")
+                
+                completion(.failure(error))
             }
-            self?.task = nil
+            self.task = nil
         }
         
         self.task = task
