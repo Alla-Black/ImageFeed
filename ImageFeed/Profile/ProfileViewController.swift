@@ -1,4 +1,5 @@
 import UIKit
+import Kingfisher
 
 final class ProfileViewController: UIViewController {
     private var nameLabel: UILabel?
@@ -36,7 +37,25 @@ final class ProfileViewController: UIViewController {
             let profileImageURL = ProfileImageService.shared.avatarURL,
             let url = URL(string: profileImageURL)
         else { return }
-        // TODO [Sprint 11] Обновить аватар, используя Kingfisher
+        let processor = RoundCornerImageProcessor(cornerRadius: 35)
+        avatarImage?.kf.indicatorType = .activity
+        avatarImage?.kf.setImage(with: url,
+                                placeholder: UIImage(named: "emptyAvatar"),
+                                 options: [.processor(processor),
+                                           .scaleFactor(UIScreen.main.scale),
+                                           .cacheOriginalImage,
+                                           .forceRefresh
+                                 ]) { result in
+            switch result {
+            case .success(let value):
+                print(value.image)
+                print(value.cacheType)
+                print(value.source)
+                
+            case .failure(let error):
+                print(error)
+            }
+        }
     }
 
     private func updateProfileDetails(with profile: Profile) {
