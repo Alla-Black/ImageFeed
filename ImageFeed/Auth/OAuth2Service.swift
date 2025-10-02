@@ -8,9 +8,9 @@ final class OAuth2Service {
     static let shared = OAuth2Service()
     private init() {}
     
-    private let tokenStorage = OAuth2TokenStorage()
     private var task: URLSessionTask?
     private var lastCode: String?
+    private let storage = OAuth2TokenStorage.shared
     
     func fetchAuthToken(code: String, completion: @escaping (Result<String, Error>) -> Void) {
         assert(Thread.isMainThread)
@@ -40,7 +40,7 @@ final class OAuth2Service {
                
                     print(data.access_token)
                     
-                self.tokenStorage.token = data.access_token
+                self.storage.token = data.access_token
                     completion(.success(data.access_token))
                     
                     self.task = nil
