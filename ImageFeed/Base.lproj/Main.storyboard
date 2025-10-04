@@ -133,22 +133,6 @@
             </objects>
             <point key="canvasLocation" x="-2897.1014492753625" y="-1850.2232142857142"/>
         </scene>
-        <!--Profile-->
-        <scene sceneID="qGx-ph-bkO">
-            <objects>
-                <viewController storyboardIdentifier="ProfileViewController" title="Profile" id="crz-uJ-gc9" customClass="ProfileViewController" customModule="ImageFeed" customModuleProvider="target" sceneMemberID="viewController">
-                    <view key="view" contentMode="scaleToFill" id="JmY-T3-dEJ">
-                        <rect key="frame" x="0.0" y="0.0" width="414" height="896"/>
-                        <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
-                        <viewLayoutGuide key="safeArea" id="EFw-xD-Axl"/>
-                        <color key="backgroundColor" name="YP Black"/>
-                    </view>
-                    <tabBarItem key="tabBarItem" title="" image="tab_profile_active" id="Byv-Ym-cVQ"/>
-                </viewController>
-                <placeholder placeholderIdentifier="IBFirstResponder" id="hlI-Pl-2aO" userLabel="First Responder" customClass="UIResponder" sceneMemberID="firstResponder"/>
-            </objects>
-            <point key="canvasLocation" x="-2897.1014492753625" y="-1172.5446428571429"/>
-        </scene>
         <!--Single Image-->
         <scene sceneID="GSq-Dt-nBh">
             <objects>
@@ -376,7 +360,6 @@
         <image name="like_button_on" width="44" height="44"/>
         <image name="share_button" width="50.5" height="50"/>
         <image name="tab_editorial_active" width="30" height="30"/>
-        <image name="tab_profile_active" width="30" height="30"/>
         <namedColor name="YP Background">
             <color red="0.10196078431372549" green="0.10588235294117647" blue="0.13333333333333333" alpha="0.5" colorSpace="custom" customColorSpace="sRGB"/>
         </namedColor>
