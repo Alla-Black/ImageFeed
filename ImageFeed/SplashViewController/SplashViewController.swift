@@ -3,6 +3,15 @@ import UIKit
 final class SplashViewController: UIViewController {
     private let showAuthenticationScreenSegueIdentifier = "ShowAuthenticationScreen"
     private var hasPresentedAuth = false
+    private var launchIcon: UIImageView?
+    
+    override func viewDidLoad() {
+        super.viewDidLoad()
+        
+        view.backgroundColor = UIColor(named: "YP Black")
+        
+        addViewsToScreen()
+    }
     
     override func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(animated)
@@ -14,9 +23,49 @@ final class SplashViewController: UIViewController {
                 
             } else {
                 // Пользователь не авторизован, переход на экран авторизации
-                performSegue(withIdentifier: showAuthenticationScreenSegueIdentifier, sender: nil)
+                presentAuthViewController()
             }
         }
+    
+    private func addViewsToScreen() {
+        let launchIcon = UIImageView(image: UIImage(named: "launch_Icon"))
+        
+        launchIcon.translatesAutoresizingMaskIntoConstraints = false
+        
+        view.addSubview(launchIcon)
+        
+        NSLayoutConstraint.activate([
+            launchIcon.centerXAnchor.constraint(equalTo: view.centerXAnchor),
+            launchIcon.centerYAnchor.constraint(equalTo: view.centerYAnchor)
+        ])
+    }
+    
+    private func presentAuthViewController() {
+        
+        let storyboard = UIStoryboard(name: "Main", bundle: .main)
+       guard let authViewController = storyboard.instantiateViewController(withIdentifier: "AuthViewController") as? AuthViewController else {
+           assertionFailure("Couldn't find AuthViewController by ID")
+           return
+        }
+        
+        authViewController.delegate = self
+        authViewController.modalPresentationStyle = .fullScreen
+        present(authViewController, animated: true)
+    }
+    
+    private func  switchToTabBarController() {
+        guard
+            let window = UIApplication.shared.windows.first else {
+            assertionFailure("Invalid window configuration")
+            return
+        }
+        
+        let tabBarController = UIStoryboard(name: "Main", bundle: .main)
+            .instantiateViewController(withIdentifier: "TabBarController")
+        
+        window.rootViewController = tabBarController
+        window.makeKeyAndVisible()
+    }
     
     private func fetchProfile(token: String) {
         UIBlockingProgressHUD.show()
@@ -38,24 +87,7 @@ final class SplashViewController: UIViewController {
             }
         }
     }
-    
-    
-    
-    private func  switchToTabBarController() {
-        guard
-            let window = UIApplication.shared.windows.first else {
-            assertionFailure("Invalid window configuration")
-            return
-        }
-        
-        let tabBarController = UIStoryboard(name: "Main", bundle: .main)
-            .instantiateViewController(withIdentifier: "TabBarController")
-        
-        window.rootViewController = tabBarController
-        window.makeKeyAndVisible()
-    }
 }
-
 
 extension SplashViewController: AuthViewControllerDelegate {
     
@@ -67,20 +99,5 @@ extension SplashViewController: AuthViewControllerDelegate {
             return
         }
         fetchProfile(token: token)
-    }
-    
-    override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
-        if segue.identifier == showAuthenticationScreenSegueIdentifier {
-            guard
-                let navigationController = segue.destination as? UINavigationController,
-                let viewController = navigationController.viewControllers.first as? AuthViewController
-            else {
-                assertionFailure("Failed to prepare for \(showAuthenticationScreenSegueIdentifier)")
-                return
-            }
-            viewController.delegate = self
-        } else {
-            super.prepare(for: segue, sender: sender)
-        }
     }
 }
