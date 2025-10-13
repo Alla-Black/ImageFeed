@@ -1,7 +1,7 @@
 import Foundation
 
 struct OAuthTokenResponseBody: Decodable {
-    var access_token: String
+    var accessToken: String
 }
 
 final class OAuth2Service {
@@ -37,14 +37,14 @@ final class OAuth2Service {
             
             switch result {
             case .success(let data):
-               
-                    print(data.access_token)
-                    
-                self.storage.token = data.access_token
-                    completion(.success(data.access_token))
-                    
-                    self.task = nil
-                    self.lastCode = nil
+                
+                print(data.accessToken)
+                
+                self.storage.token = data.accessToken
+                completion(.success(data.accessToken))
+                
+                self.task = nil
+                self.lastCode = nil
                 
             case .failure(let error):
                 print("[OAuth2Service]: failure - code: \(code) - reason: \(error.localizedDescription)")

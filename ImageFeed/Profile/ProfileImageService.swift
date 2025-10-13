@@ -45,16 +45,16 @@ final class ProfileImageService {
             switch result {
             case .success(let data):
                 
-                    self.avatarURL = data.profileImage.small
+                self.avatarURL = data.profileImage.small
                 completion(.success(data.profileImage.small))
-                        
-                        NotificationCenter.default
-                            .post(
-                                name: ProfileImageService.didChangeNotification,
-                                object: self,
-                                userInfo: ["URL": data.profileImage.small]
-                            )
-                    
+                
+                NotificationCenter.default
+                    .post(
+                        name: ProfileImageService.didChangeNotification,
+                        object: self,
+                        userInfo: ["URL": data.profileImage.small]
+                    )
+                
             case .failure(let error):
                 print("[ProfileImageService.fetchProfileImageURL]: failure - url: \(request.url?.absoluteString ?? "") - username: \(username) - reason: \(error.localizedDescription)")
                 

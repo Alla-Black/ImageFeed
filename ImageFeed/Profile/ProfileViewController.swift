@@ -42,7 +42,7 @@ final class ProfileViewController: UIViewController {
         let processor = RoundCornerImageProcessor(cornerRadius: 35)
         avatarImage?.kf.indicatorType = .activity
         avatarImage?.kf.setImage(with: url,
-                                placeholder: UIImage(named: "emptyAvatar"),
+                                 placeholder: UIImage(resource: .emptyAvatar),
                                  options: [.processor(processor),
                                            .scaleFactor(UIScreen.main.scale),
                                            .cacheOriginalImage,

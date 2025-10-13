@@ -1,7 +1,7 @@
 import Foundation
 import SwiftKeychainWrapper
 
-class OAuth2TokenStorage {
+final class OAuth2TokenStorage {
     static let shared = OAuth2TokenStorage()
     private init() {}
     
@@ -9,7 +9,7 @@ class OAuth2TokenStorage {
     
     var token: String? {
         get {
-            return KeychainWrapper.standard.string(forKey: key)
+            KeychainWrapper.standard.string(forKey: key)
         }
         set {
             if let token = newValue{
