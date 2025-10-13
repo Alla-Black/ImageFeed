@@ -14,6 +14,9 @@ final class ImagesListViewController: UIViewController {
         return formatter
     }()
     
+    private let imagesListService = ImagesListService()
+    private var imagesListServiceObserver: NSObjectProtocol?
+    
     override func viewDidLoad() {
         super.viewDidLoad()
         
@@ -36,6 +39,30 @@ final class ImagesListViewController: UIViewController {
                 tabBar.barTintColor = UIColor(named: "YP Black") ?? .black
             }
             tabBar.tintColor = .white // Цвет активной иконки/tab label
+        }
+        
+        imagesListServiceObserver = NotificationCenter.default.addObserver(
+            forName: ImagesListService.didChangeNotification,
+            object: imagesListService,
+            queue: .main
+        ) { [weak self] _ in
+            guard let self = self else { return }
+            let oldCount = self.tableView.numberOfRows(inSection: 0)
+            let newCount = self.imagesListService.photos.count
+            guard newCount > oldCount else { return }
+
+            let indexPaths = (oldCount..<newCount).map { IndexPath(row: $0, section: 0) }
+            self.tableView.performBatchUpdates({
+                self.tableView.insertRows(at: indexPaths, with: .automatic)
+            })
+        }
+
+        imagesListService.fetchPhotosNextPage()
+    }
+    
+    deinit {
+        if let observer = imagesListServiceObserver {
+            NotificationCenter.default.removeObserver(observer)
         }
     }
     
@@ -77,12 +104,14 @@ extension ImagesListViewController: UITableViewDelegate {
     }
     
     func tableView(
-      _ tableView: UITableView,
-      willDisplay cell: UITableViewCell,
-      forRowAt indexPath: IndexPath
+        _ tableView: UITableView,
+        willDisplay cell: UITableViewCell,
+        forRowAt indexPath: IndexPath
     ) {
-        // ... if indexPath.row + 1 == photos.count {
-        // fetchPhotosNextPage() }
+        if indexPath.row + 1 == imagesListService.photos.count {
+            imagesListService.fetchPhotosNextPage()
+        }
+    }
 }
 
 extension ImagesListViewController: UITableViewDataSource {
