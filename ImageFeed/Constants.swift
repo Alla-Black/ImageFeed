@@ -9,6 +9,7 @@ enum Constants {
     
     static let defaultScheme = "https"
     static let defaultHost = "unsplash.com"
+    static let apiHost = "api.unsplash.com"
     static let oauthPath = "/oauth/token"
     static let photosPath = "/photos"
 }

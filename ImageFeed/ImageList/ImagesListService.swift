@@ -132,7 +132,7 @@ final class ImagesListService {
     private func makePhotoRequest(token: String, page: Int) -> URLRequest? {
         var urlComponents = URLComponents()
         urlComponents.scheme = Constants.defaultScheme
-        urlComponents.host = Constants.defaultHost
+        urlComponents.host = Constants.apiHost
         urlComponents.path = Constants.photosPath
         
         urlComponents.queryItems = [
