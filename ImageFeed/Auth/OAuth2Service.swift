@@ -1,42 +1,63 @@
 import Foundation
 
 struct OAuthTokenResponseBody: Decodable {
-    var access_token: String
+    var accessToken: String
 }
 
 final class OAuth2Service {
     static let shared = OAuth2Service()
     private init() {}
     
-    private let tokenStorage = OAuth2TokenStorage()
+    private var task: URLSessionTask?
+    private var lastCode: String?
+    private let storage = OAuth2TokenStorage.shared
     
     func fetchAuthToken(code: String, completion: @escaping (Result<String, Error>) -> Void) {
-        guard let request = makeOAuthTokenRequest(code: code) else {
-            completion(.failure(NetworkError.invalidRequest))
-            return }
+        assert(Thread.isMainThread)
         
-        let task = URLSession.shared.data(for: request) { result in
-            switch result {
-               case .success(let data):
-                do {
-                    let decoder = JSONDecoder()
-                    let responseBody = try decoder.decode(OAuthTokenResponseBody.self, from: data)
-                    print(responseBody.access_token)
-                    self.tokenStorage.token = responseBody.access_token
-                    completion(.success(responseBody.access_token))
-                }
-                catch {
-                    print(error)
-                    completion(.failure(NetworkError.decodingError(error)))
-                }
-               case .failure(let error):
-                print(error)
-                completion(.failure(error))
-            }
+        if lastCode == code {
+            completion(.failure(NetworkError.invalidRequest))
+            return
         }
         
-        task.resume()
-    }
+        if task != nil {
+            task?.cancel()
+        }
+        
+        lastCode = code
+        
+        guard let request = makeOAuthTokenRequest(code: code) else {
+            completion(.failure(NetworkError.invalidRequest))
+            lastCode = nil
+            return
+        }
+        
+        let task = URLSession.shared.objectTask(for: request) { [weak self] (result: Result<OAuthTokenResponseBody, Error>) in
+            guard let self else { return }
+            
+            switch result {
+            case .success(let data):
+                
+                print(data.accessToken)
+                
+                self.storage.token = data.accessToken
+                completion(.success(data.accessToken))
+                
+                self.task = nil
+                self.lastCode = nil
+                
+            case .failure(let error):
+                print("[OAuth2Service]: failure - code: \(code) - reason: \(error.localizedDescription)")
+                completion(.failure(error))
+                
+                self.task = nil
+                self.lastCode = nil
+            }
+        }
+    
+            self.task = task
+            task.resume()
+        }
     
     private func makeOAuthTokenRequest(code: String) -> URLRequest? {
         var urlComponents = URLComponents()
