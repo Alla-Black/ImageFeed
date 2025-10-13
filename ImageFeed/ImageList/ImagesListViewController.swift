@@ -21,6 +21,22 @@ final class ImagesListViewController: UIViewController {
         tableView.delegate = self
         
         tableView.contentInset = UIEdgeInsets(top: 12, left: 0, bottom: 12, right: 0)
+        
+        // Настройки внешнего вида Tab Bar — ДЕЛАЮТ ЕГО ЧЁРНЫМ
+        if let tabBar = tabBarController?.tabBar {
+            if #available(iOS 13.0, *) {
+                let appearance = UITabBarAppearance()
+                appearance.configureWithOpaqueBackground()
+                appearance.backgroundColor = UIColor(named: "YP Black") ?? .black
+                tabBar.standardAppearance = appearance
+                if #available(iOS 15.0, *) {
+                    tabBar.scrollEdgeAppearance = appearance
+                }
+            } else {
+                tabBar.barTintColor = UIColor(named: "YP Black") ?? .black
+            }
+            tabBar.tintColor = .white // Цвет активной иконки/tab label
+        }
     }
     
     override func prepare(for segue: UIStoryboardSegue, sender: Any?) {

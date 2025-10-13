@@ -21,21 +21,50 @@ extension URLSession {
                 if 200 ..< 300 ~= statusCode {
                     fulfillCompletionOnTheMainThread(.success(data))
                 } else {
-                    print("HTTP Error \(statusCode):", String(data: data, encoding: .utf8) ?? "No response body")
+                    print("[URLSession.data]: HTTP error \(statusCode) - url: \(request.url?.absoluteString ?? "") - body: \(String(data: data, encoding: .utf8) ?? "No response body")")
                     
                     fulfillCompletionOnTheMainThread(.failure(NetworkError.httpStatusCode(statusCode)))
                 }
+                
             } else if let error = error {
-                print("URL request error: \(error)")
+                print("[URLSession.data]: URLRequest error - url: \(request.url?.absoluteString ?? "") - reason: \(error.localizedDescription)")
                 
                 fulfillCompletionOnTheMainThread(.failure(NetworkError.urlRequestError(error)))
+                
             } else {
-                print("URL session error: No data, response, or error")
+                print("[URLSession.data]: URLSession error - url: \(request.url?.absoluteString ?? "") - no data/response/error")
                 
                 fulfillCompletionOnTheMainThread(.failure(NetworkError.urlSessionError))
             }
         })
         
+        return task
+    }
+    
+    func objectTask<T: Decodable>(
+        for request: URLRequest,
+        completion: @escaping (Result<T, Error>) -> Void
+    ) -> URLSessionTask {
+        let decoder = JSONDecoder()
+        let task = data(for: request) { (result: Result<Data, Error>) in
+            switch result {
+            case .success(let data):
+                do {
+                   let decodedObject = try decoder.decode(T.self, from: data)
+                    completion(.success(decodedObject))
+                }
+                catch {
+                    print("[URLSession.objectTask]: decoding error - url: \(request.url?.absoluteString ?? "") - reason: \(error.localizedDescription) - body: \(String(data: data, encoding: .utf8) ?? "unreadable")")
+                    
+                    completion(.failure(NetworkError.decodingError(error)))
+                }
+                
+            case .failure(let error):
+                print("[URLSession.objectTask]: failure - url: \(request.url?.absoluteString ?? "") - reason: \(error.localizedDescription)")
+                
+                completion(.failure(error))
+            }
+        }
         return task
     }
 }

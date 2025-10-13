@@ -1,4 +1,5 @@
 import UIKit
+import Kingfisher
 
 final class ProfileViewController: UIViewController {
     private var nameLabel: UILabel?
@@ -8,10 +9,65 @@ final class ProfileViewController: UIViewController {
     private var logoutButton: UIButton?
     private var profileInformation: [UIView] = []
     
+    private var profileImageServiceObserver: NSObjectProtocol?
+    
+    
     override func viewDidLoad() {
         super.viewDidLoad()
         
+        view.backgroundColor = UIColor(named: "YP Black")
+        
         addViewsToScreen()
+        
+        if let profile = ProfileService.profileService.profile {
+            updateProfileDetails(with: profile)
+        }
+        
+        profileImageServiceObserver = NotificationCenter.default.addObserver(
+            forName: ProfileImageService.didChangeNotification,
+            object: nil,
+            queue: .main
+        ) { [weak self] _ in
+            guard let self else { return }
+            self.updateAvatar()
+        }
+        updateAvatar()
+    }
+    
+    private func updateAvatar() {
+        guard
+            let profileImageURL = ProfileImageService.shared.avatarURL,
+            let url = URL(string: profileImageURL)
+        else { return }
+        let processor = RoundCornerImageProcessor(cornerRadius: 35)
+        avatarImage?.kf.indicatorType = .activity
+        avatarImage?.kf.setImage(with: url,
+                                 placeholder: UIImage(resource: .emptyAvatar),
+                                 options: [.processor(processor),
+                                           .scaleFactor(UIScreen.main.scale),
+                                           .cacheOriginalImage,
+                                           .forceRefresh
+                                 ]) { result in
+            switch result {
+            case .success(let value):
+                print(value.image)
+                print(value.cacheType)
+                print(value.source)
+                
+            case .failure(let error):
+                print(error)
+            }
+        }
+    }
+
+    private func updateProfileDetails(with profile: Profile) {
+        nameLabel?.text = profile.name.isEmpty ? "Имя не указано"
+        : profile.name
+        loginName?.text = profile.loginName.isEmpty ? "@неизвестный_пользователь"
+        : profile.loginName
+        descriptionLabel?.text = (profile.bio?.isEmpty ?? true)
+        ? "Профиль не заполнен"
+        : profile.bio
     }
     
     private func addViewsToScreen() {
@@ -38,7 +94,9 @@ final class ProfileViewController: UIViewController {
         nameLabel.textColor = UIColor(named: "YP White")
         nameLabel.font = UIFont.systemFont(ofSize: 23, weight: .bold)
         
-        loginName.text = "ekaterina_nov"
+        
+        
+        loginName.text = "@ekaterina_nov"
         loginName.textColor = UIColor(named: "YP Gray")
         loginName.font = UIFont.systemFont(ofSize: 13, weight: .regular)
         
@@ -107,5 +165,11 @@ final class ProfileViewController: UIViewController {
             
             logoutButton.centerYAnchor.constraint(equalTo: emptyAvatar.centerYAnchor)
             ])
+    }
+    
+    deinit {
+        if let observer = profileImageServiceObserver {
+            NotificationCenter.default.removeObserver(observer)
+        }
     }
 }
