@@ -36,6 +36,16 @@ final class ImagesListCell: UITableViewCell {
     override func layoutSubviews() {
         super.layoutSubviews()
         gradientLayer.frame = gradientView.bounds
+        gradientView.layer.cornerRadius = imageInCell.layer.cornerRadius
     }
     
+    override func prepareForReuse() {
+        super.prepareForReuse()
+        
+        imageInCell.kf.cancelDownloadTask()
+        
+        imageInCell.image = UIImage(named: "placeholder") ?? nil
+        dataLabel.text = nil
+        likeButton.isSelected = false
+    }
 }
