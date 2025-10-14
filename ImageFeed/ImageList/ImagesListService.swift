@@ -106,7 +106,10 @@ final class ImagesListService {
                 let newPhotos = results.map { self.map($0) }
                 
                 DispatchQueue.main.async {
-                    self.photos.append(contentsOf: newPhotos)
+                    let existingIds = Set(self.photos.map { $0.id })
+                    let unique = newPhotos.filter { !existingIds.contains($0.id) }
+                    self.photos.append(contentsOf: unique)
+                    
                     self.lastLoadedPage = nextPage
                     self.isLoadingNextPage = false
                     self.currentTask = nil
