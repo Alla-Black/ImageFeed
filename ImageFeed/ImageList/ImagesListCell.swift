@@ -3,6 +3,8 @@ import UIKit
 final class ImagesListCell: UITableViewCell {
     static let reuseIdentifier = "ImagesListCell"
     
+    weak var delegate: ImagesListCellDelegate?
+    
     @IBOutlet weak var imageInCell: UIImageView!
     @IBOutlet weak var likeButton: UIButton!
     @IBOutlet weak var dataLabel: UILabel!
@@ -49,7 +51,17 @@ final class ImagesListCell: UITableViewCell {
         likeButton.isSelected = false
     }
     
-    @IBAction private func likeButtonTapped(_ sender: UIButton) {
-        
+    @IBAction private func likeButtonClicked() {
+        delegate?.imageListCellDidTapLike(self)
     }
+    
+    func setIsLiked(_ isLiked: Bool) {
+        let image = UIImage(named: isLiked ? "like_button_on" : "like_button_off")
+        likeButton.setImage(image, for: .normal)
+        likeButton.accessibilityValue = isLiked ? "liked" : "not liked"
+    }
+}
+
+protocol ImagesListCellDelegate: AnyObject {
+    func imageListCellDidTapLike(_ cell: ImagesListCell)
 }

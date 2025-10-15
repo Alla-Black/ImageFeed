@@ -214,12 +214,8 @@ final class ImagesListService {
                     self.photos[index] = updatedPhoto
                 }
                 
-                    NotificationCenter.default.post(
-                        name: ImagesListService.didChangeNotification,
-                        object: self
-                    )
-                    completion(.success(()))
                     self.isChangingLike = false
+                    completion(.success(()))
                 }
             }
             

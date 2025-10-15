@@ -76,7 +76,7 @@
                                                     <inset key="imageEdgeInsets" minX="0.0" minY="0.0" maxX="2.2250738585072014e-308" maxY="0.0"/>
                                                     <state key="normal" image="like_button_on"/>
                                                     <connections>
-                                                        <action selector="likeButtonTapped:" destination="Q3q-g1-ZWZ" eventType="touchUpInside" id="cnM-Ks-8Ka"/>
+                                                        <action selector="likeButtonClicked" destination="Q3q-g1-ZWZ" eventType="touchUpInside" id="sb9-tv-9kf"/>
                                                     </connections>
                                                 </button>
                                                 <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="21 августа 2025" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="8m6-vS-XIi" userLabel="Data Label">
