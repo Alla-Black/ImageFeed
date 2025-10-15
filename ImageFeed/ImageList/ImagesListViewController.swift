@@ -70,6 +70,9 @@ final class ImagesListViewController: UIViewController {
                 return
             }
             
+            let photo = photos[indexPath.row]
+            viewController.fullImageURL = URL(string: photo.fullImageURL)
+            
             if let cell = tableView.cellForRow(at: indexPath) as?ImagesListCell {
                 viewController.image = cell.imageInCell.image
             } else {
