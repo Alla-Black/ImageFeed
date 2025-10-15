@@ -36,11 +36,16 @@ struct PhotoResult: Decodable {
     }
 }
 
+struct LikeResponse: Decodable {
+    let photo: PhotoResult
+}
+
 final class ImagesListService {
     private(set) var photos: [Photo] = []
     private var lastLoadedPage: Int?
     private var isLoadingNextPage = false
     private var currentTask: URLSessionDataTask?
+    private var isChangingLike = false
     
     static let didChangeNotification = Notification.Name(rawValue: "ImagesListServiceDidChange")
     
@@ -149,6 +154,99 @@ final class ImagesListService {
         
         var request = URLRequest(url: photosUrl)
         request.httpMethod = "GET"
+        request.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
+        request.setValue("application/json", forHTTPHeaderField: "Accept")
+        
+        return request
+    }
+    
+    func changeLike(photoId: String, isLike: Bool, _ completion: @escaping (Result<Void, Error>) -> Void) {
+        if isChangingLike { return }
+        isChangingLike = true
+        
+        guard let token = OAuth2TokenStorage.shared.token else {
+            self.isChangingLike = false
+            completion(.failure(URLError(.userAuthenticationRequired)))
+            return
+        }
+        
+        guard let request = makeLikeRequest(token: token, photoId: photoId, isLike: isLike) else {
+            self.isChangingLike = false
+            completion(.failure(URLError(.badURL)))
+            return
+        }
+        
+        let task = URLSession.shared.dataTask(with: request) { [weak self] data, response, error in
+            guard let self else { return }
+            
+            if let error {
+                DispatchQueue.main.async {
+                    completion(.failure(error))
+                    self.isChangingLike = false
+                }
+                print("ImagesListService transport error: \(error)")
+                return
+            }
+            
+            guard
+                let http = response as? HTTPURLResponse,
+                (200...299).contains(http.statusCode),
+                let data = data
+            else {
+                DispatchQueue.main.async {
+                    completion(.failure(URLError(.badServerResponse)))
+                    self.isChangingLike = false
+                }
+                print("ImagesListService bad response or no data")
+                return
+            }
+            
+            do {
+                let decoder = JSONDecoder()
+                decoder.dateDecodingStrategy = .iso8601
+                let likeResponse = try decoder.decode(LikeResponse.self, from: data)
+                let photoResult = likeResponse.photo
+                let updatedPhoto = self.map(photoResult)
+                
+                // Обновление массива фото после лайка
+                DispatchQueue.main.async {
+                if let index = self.photos.firstIndex(where: { $0.id == photoId }) {
+                    self.photos[index] = updatedPhoto
+                }
+                
+                    NotificationCenter.default.post(
+                        name: ImagesListService.didChangeNotification,
+                        object: self
+                    )
+                    completion(.success(()))
+                    self.isChangingLike = false
+                }
+            }
+            
+            catch {
+                DispatchQueue.main.async {
+                    completion(.failure(error))
+                    self.isChangingLike = false
+                }
+                print("ImagesListService decode error: \(error)")
+                return
+            }
+        }
+        task.resume()
+    }
+    
+    private func makeLikeRequest(token: String, photoId: String, isLike: Bool) -> URLRequest? {
+        var urlComponents = URLComponents()
+        urlComponents.scheme = Constants.defaultScheme
+        urlComponents.host = Constants.apiHost
+        urlComponents.path = Constants.photosPath + "/\(photoId)/like"
+        
+        guard let statusLikeUrl = urlComponents.url else {
+            return nil
+        }
+        
+        var request = URLRequest(url: statusLikeUrl)
+        request.httpMethod = isLike ? "POST" : "DELETE"
         request.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
         request.setValue("application/json", forHTTPHeaderField: "Accept")
         

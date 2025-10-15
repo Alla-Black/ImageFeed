@@ -48,4 +48,8 @@ final class ImagesListCell: UITableViewCell {
         dataLabel.text = nil
         likeButton.isSelected = false
     }
+    
+    @IBAction private func likeButtonTapped(_ sender: UIButton) {
+        
+    }
 }
