@@ -152,7 +152,7 @@ final class ProfileViewController: UIViewController {
             message: "Уверены, что хотите выйти?",
             preferredStyle: .alert
         )
-        let logoutAction = UIAlertAction(title: "Да", style: .destructive) { [weak self] _ in
+        let logoutAction = UIAlertAction(title: "Да", style: .default) { [weak self] _ in
             guard let self else { return }
             
             UIBlockingProgressHUD.show()
@@ -174,7 +174,7 @@ final class ProfileViewController: UIViewController {
             self.switchToSplashRoot()
             }
         
-        let cancelAction = UIAlertAction(title: "Нет", style: .cancel)
+        let cancelAction = UIAlertAction(title: "Нет", style: .default)
         
         alert.addAction(logoutAction)
         alert.addAction(cancelAction)
