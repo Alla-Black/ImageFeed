@@ -16,7 +16,7 @@ final class ImagesListViewController: UIViewController {
         return formatter
     }()
     
-    private let imagesListService = ImagesListService()
+    private let imagesListService = ImagesListService.shared
     private var imagesListServiceObserver: NSObjectProtocol?
     
     override func viewDidLoad() {
@@ -158,15 +158,22 @@ extension ImagesListViewController {
     
     func updateTableViewAnimated() {
         let oldCount = photos.count
-        let newCount = imagesListService.photos.count
-        photos = imagesListService.photos
-        if oldCount != newCount {
+        let newPhotos = imagesListService.photos
+        let newCount = newPhotos.count
+        
+        guard oldCount != newCount else { return }
+        
+        if newCount > oldCount {
+            
+            photos = newPhotos
+            let indexPaths = (oldCount..<newCount).map { IndexPath(row: $0, section: 0) }
             tableView.performBatchUpdates {
-                let indexPaths = (oldCount..<newCount).map { i in
-                    IndexPath(row: i, section: 0)
-                }
                 tableView.insertRows(at: indexPaths, with: .automatic)
             } completion: { _ in }
+        } else {
+            
+            photos = newPhotos
+            tableView.reloadData()
         }
     }
 }

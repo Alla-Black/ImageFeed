@@ -2,6 +2,10 @@ import Foundation
 
 struct OAuthTokenResponseBody: Decodable {
     var accessToken: String
+    
+    enum CodingKeys: String, CodingKey {
+            case accessToken = "access_token"
+        }
 }
 
 final class OAuth2Service {

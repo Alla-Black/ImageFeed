@@ -1,5 +1,6 @@
 import UIKit
 import Kingfisher
+import ProgressHUD
 
 final class ProfileViewController: UIViewController {
     private var nameLabel: UILabel?
@@ -38,7 +39,11 @@ final class ProfileViewController: UIViewController {
         guard
             let profileImageURL = ProfileImageService.shared.avatarURL,
             let url = URL(string: profileImageURL)
-        else { return }
+        else {
+            avatarImage?.kf.cancelDownloadTask()
+            avatarImage?.image = UIImage(resource: .emptyAvatar)
+            return
+        }
         let processor = RoundCornerImageProcessor(cornerRadius: 35)
         avatarImage?.kf.indicatorType = .activity
         avatarImage?.kf.setImage(with: url,
@@ -142,29 +147,49 @@ final class ProfileViewController: UIViewController {
     
     @objc func didTapLogoutButton () {
         
-        for view in profileInformation {
-            view.removeFromSuperview()
-        }
-        profileInformation.removeAll()
-        
-        nameLabel = nil
-        loginName = nil
-        descriptionLabel = nil
-        avatarImage = nil
-        
-        let emptyAvatar = UIImageView(image: UIImage(named: "emptyAvatar"))
-        emptyAvatar.translatesAutoresizingMaskIntoConstraints = false
-        view.addSubview(emptyAvatar)
-        guard let logoutButton = self.logoutButton else { return }
-        
-        NSLayoutConstraint.activate([
-            emptyAvatar.widthAnchor.constraint(equalToConstant: 70),
-            emptyAvatar.heightAnchor.constraint(equalToConstant: 70),
-            emptyAvatar.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 16),
-            emptyAvatar.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: 32),
+        let alert = UIAlertController(
+            title: "Пока, пока!",
+            message: "Уверены, что хотите выйти?",
+            preferredStyle: .alert
+        )
+        let logoutAction = UIAlertAction(title: "Да", style: .destructive) { [weak self] _ in
+            guard let self else { return }
             
-            logoutButton.centerYAnchor.constraint(equalTo: emptyAvatar.centerYAnchor)
-            ])
+            UIBlockingProgressHUD.show()
+            
+            ProfileLogoutService.shared.logout()
+            
+            for view in profileInformation {
+                view.removeFromSuperview()
+            }
+            profileInformation.removeAll()
+            
+            self.nameLabel = nil
+            self.loginName = nil
+            self.descriptionLabel = nil
+            self.avatarImage = nil
+            
+            UIBlockingProgressHUD.dismiss()
+            
+            self.switchToSplashRoot()
+            }
+        
+        let cancelAction = UIAlertAction(title: "Нет", style: .cancel)
+        
+        alert.addAction(logoutAction)
+        alert.addAction(cancelAction)
+            
+        present(alert, animated: true)
+    }
+    
+    private func switchToSplashRoot() {
+        DispatchQueue.main.async {
+            if let windowScene = UIApplication.shared.connectedScenes.first as? UIWindowScene,
+               let window = windowScene.windows.first {
+                window.rootViewController = SplashViewController()
+                window.makeKeyAndVisible()
+            }
+        }
     }
     
     deinit {

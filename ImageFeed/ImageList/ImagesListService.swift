@@ -47,6 +47,10 @@ final class ImagesListService {
     private var isLoadingNextPage = false
     private var currentTask: URLSessionDataTask?
     private var isChangingLike = false
+    private var likeTask: URLSessionDataTask?
+    
+    static let shared = ImagesListService()
+    private init() {}
     
     static let didChangeNotification = Notification.Name(rawValue: "ImagesListServiceDidChange")
     
@@ -178,13 +182,14 @@ final class ImagesListService {
             return
         }
         
-        let task = URLSession.shared.dataTask(with: request) { [weak self] data, response, error in
+        self.likeTask = URLSession.shared.dataTask(with: request) { [weak self] data, response, error in
             guard let self else { return }
             
             if let error {
                 DispatchQueue.main.async {
                     completion(.failure(error))
                     self.isChangingLike = false
+                    self.likeTask = nil
                 }
                 print("ImagesListService transport error: \(error)")
                 return
@@ -198,6 +203,7 @@ final class ImagesListService {
                 DispatchQueue.main.async {
                     completion(.failure(URLError(.badServerResponse)))
                     self.isChangingLike = false
+                    self.likeTask = nil
                 }
                 print("ImagesListService bad response or no data")
                 return
@@ -217,6 +223,7 @@ final class ImagesListService {
                 }
                 
                     self.isChangingLike = false
+                    self.likeTask = nil
                     completion(.success(()))
                 }
             }
@@ -225,12 +232,13 @@ final class ImagesListService {
                 DispatchQueue.main.async {
                     completion(.failure(error))
                     self.isChangingLike = false
+                    self.likeTask = nil
                 }
                 print("ImagesListService decode error: \(error)")
                 return
             }
         }
-        task.resume()
+        self.likeTask?.resume()
     }
     
     private func makeLikeRequest(token: String, photoId: String, isLike: Bool) -> URLRequest? {
@@ -249,5 +257,27 @@ final class ImagesListService {
         request.setValue("application/json", forHTTPHeaderField: "Accept")
         
         return request
+    }
+    
+    func reset() {
+        currentTask?.cancel()
+        currentTask = nil
+        
+        self.likeTask?.cancel()
+        self.likeTask = nil
+        
+        DispatchQueue.main.async {
+            
+            self.isLoadingNextPage = false
+            self.isChangingLike = false
+            self.lastLoadedPage = nil
+            
+            self.photos.removeAll()
+            
+            NotificationCenter.default.post(
+                name: ImagesListService.didChangeNotification,
+                object: self
+            )
+        }
     }
 }
