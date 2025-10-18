@@ -92,7 +92,7 @@ final class ImagesListService {
                     self.isLoadingNextPage = false
                     self.currentTask = nil
                 }
-                print("ImagesListService transport error: \(error)")
+                print("[fetchPhotosNextPage ImagesListService]: transport error: \(error) [page=\(nextPage)]")
                 return
             }
             
@@ -105,7 +105,7 @@ final class ImagesListService {
                     self.isLoadingNextPage = false
                     self.currentTask = nil
                 }
-                print("ImagesListService bad response or no data")
+                print("[fetchPhotosNextPage ImagesListService]: bad response or no data")
                 return
             }
             
@@ -134,7 +134,7 @@ final class ImagesListService {
                     self.isLoadingNextPage = false
                     self.currentTask = nil
                 }
-                print("ImagesListService decode error: \(error)")
+                print("[fetchPhotosNextPage ImagesListService]: decode error: \(error)")
                 return
             }
         }
@@ -191,7 +191,7 @@ final class ImagesListService {
                     self.isChangingLike = false
                     self.likeTask = nil
                 }
-                print("ImagesListService transport error: \(error)")
+                print("[changeLike ImagesListService]: transport error: \(error) [photoId=\(photoId), isLike=\(isLike)]")
                 return
             }
             
@@ -205,7 +205,7 @@ final class ImagesListService {
                     self.isChangingLike = false
                     self.likeTask = nil
                 }
-                print("ImagesListService bad response or no data")
+                print("[changeLike ImagesListService]: bad response [photoId=\(photoId), isLike=\(isLike)]")
                 return
             }
             
@@ -234,7 +234,7 @@ final class ImagesListService {
                     self.isChangingLike = false
                     self.likeTask = nil
                 }
-                print("ImagesListService decode error: \(error)")
+                print("[changeLike ImagesListService]: decode error: \(error) [photoId=\(photoId), isLike=\(isLike)]")
                 return
             }
         }
