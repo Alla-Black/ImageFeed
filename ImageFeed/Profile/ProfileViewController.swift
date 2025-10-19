@@ -14,6 +14,7 @@ final class ProfileViewController: UIViewController {
     
     private let skeleton = SkeletonAnimationService()
     private var didStartSkeleton = false
+    private var isProfileDetailsLoaded = false
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -23,7 +24,9 @@ final class ProfileViewController: UIViewController {
         addViewsToScreen()
         
         if let profile = ProfileService.profileService.profile {
-            updateProfileDetails(with: profile)
+            DispatchQueue.main.async { [weak self] in
+                self?.updateProfileDetails(with: profile)
+            }
         }
         
         profileImageServiceObserver = NotificationCenter.default.addObserver(
@@ -42,10 +45,18 @@ final class ProfileViewController: UIViewController {
         guard !didStartSkeleton else { return }
         didStartSkeleton = true
         
-        if let avatarImage { skeleton.startShimmerAnimation(on: avatarImage, cornerRadius: 35)}
-        if let nameLabel { skeleton.startShimmerAnimation(on: nameLabel, cornerRadius: 9)}
-        if let loginName { skeleton.startShimmerAnimation(on: loginName, cornerRadius: 9)}
-        if let descriptionLabel { skeleton.startShimmerAnimation(on: descriptionLabel, cornerRadius: 9)}
+        if let avatarImage, (avatarImage.image == nil || avatarImage.image == UIImage(resource: .emptyAvatar)) {
+            skeleton.startShimmerAnimation(on: avatarImage, cornerRadius: 35)
+        }
+        if let nameLabel {
+            skeleton.startShimmerAnimation(on: nameLabel, cornerRadius: 9)
+        }
+        if let loginName {
+            skeleton.startShimmerAnimation(on: loginName, cornerRadius: 9)
+        }
+        if let descriptionLabel {
+            skeleton.startShimmerAnimation(on: descriptionLabel, cornerRadius: 9)
+        }
     }
     
     private func updateAvatar() {
@@ -97,6 +108,7 @@ final class ProfileViewController: UIViewController {
         ? "Профиль не заполнен" : profile.bio
         if let descriptionLabel { skeleton.stopShimmerAnimation(on: descriptionLabel)
         }
+        isProfileDetailsLoaded = true
     }
     private func addViewsToScreen() {
         let avatarImage = UIImageView(image: UIImage(named: "photoProfile"))
