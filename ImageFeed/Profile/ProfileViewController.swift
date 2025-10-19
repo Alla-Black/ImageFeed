@@ -12,6 +12,8 @@ final class ProfileViewController: UIViewController {
     
     private var profileImageServiceObserver: NSObjectProtocol?
     
+    private let skeleton = SkeletonAnimationService()
+    private var didStartSkeleton = false
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -35,6 +37,17 @@ final class ProfileViewController: UIViewController {
         updateAvatar()
     }
     
+    override func viewDidLayoutSubviews() {
+        super.viewDidLayoutSubviews()
+        guard !didStartSkeleton else { return }
+        didStartSkeleton = true
+        
+        if let avatarImage { skeleton.startShimmerAnimation(on: avatarImage, cornerRadius: 35)}
+        if let nameLabel { skeleton.startShimmerAnimation(on: nameLabel, cornerRadius: 9)}
+        if let loginName { skeleton.startShimmerAnimation(on: loginName, cornerRadius: 9)}
+        if let descriptionLabel { skeleton.startShimmerAnimation(on: descriptionLabel, cornerRadius: 9)}
+    }
+    
     private func updateAvatar() {
         guard
             let profileImageURL = ProfileImageService.shared.avatarURL,
@@ -42,6 +55,7 @@ final class ProfileViewController: UIViewController {
         else {
             avatarImage?.kf.cancelDownloadTask()
             avatarImage?.image = UIImage(resource: .emptyAvatar)
+            if let avatarImage { skeleton.stopShimmerAnimation(on: avatarImage) }
             return
         }
         let processor = RoundCornerImageProcessor(cornerRadius: 35)
@@ -52,7 +66,7 @@ final class ProfileViewController: UIViewController {
                                            .scaleFactor(UIScreen.main.scale),
                                            .cacheOriginalImage,
                                            .forceRefresh
-                                 ]) { result in
+                                 ]) { [weak self] result in
             switch result {
             case .success(let value):
                 print(value.image)
@@ -62,19 +76,28 @@ final class ProfileViewController: UIViewController {
             case .failure(let error):
                 print(error)
             }
+            
+            if let avatar = self?.avatarImage {
+                self?.skeleton.stopShimmerAnimation(on: avatar)
+            }
         }
     }
 
     private func updateProfileDetails(with profile: Profile) {
-        nameLabel?.text = profile.name.isEmpty ? "Имя не указано"
-        : profile.name
-        loginName?.text = profile.loginName.isEmpty ? "@неизвестный_пользователь"
-        : profile.loginName
+        nameLabel?.text = profile.name.isEmpty ? "Имя не указано" : profile.name
+        if let nameLabel {
+            skeleton.stopShimmerAnimation(on: nameLabel)
+        }
+        
+        loginName?.text = profile.loginName.isEmpty ? "@неизвестный_пользователь" : profile.loginName
+        if let loginName { skeleton.stopShimmerAnimation(on: loginName)
+        }
+        
         descriptionLabel?.text = (profile.bio?.isEmpty ?? true)
-        ? "Профиль не заполнен"
-        : profile.bio
+        ? "Профиль не заполнен" : profile.bio
+        if let descriptionLabel { skeleton.stopShimmerAnimation(on: descriptionLabel)
+        }
     }
-    
     private func addViewsToScreen() {
         let avatarImage = UIImageView(image: UIImage(named: "photoProfile"))
         
@@ -168,6 +191,8 @@ final class ProfileViewController: UIViewController {
             self.loginName = nil
             self.descriptionLabel = nil
             self.avatarImage = nil
+            
+            self.skeleton.stopAllShimmerAnimations()
             
             UIBlockingProgressHUD.dismiss()
             
