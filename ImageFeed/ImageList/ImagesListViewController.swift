@@ -19,6 +19,8 @@ final class ImagesListViewController: UIViewController {
     private let imagesListService = ImagesListService.shared
     private var imagesListServiceObserver: NSObjectProtocol?
     
+    private var skeleton = SkeletonAnimationService()
+    
     override func viewDidLoad() {
         super.viewDidLoad()
         
@@ -149,10 +151,19 @@ extension ImagesListViewController {
         
         let placeholder = UIImage(named: "placeholder")
         
+        self.skeleton.startShimmerAnimation(on: cell.imageInCell, cornerRadius: 16)
+        
         if let url = URL(string: photo.thumbImageURL) {
-            cell.imageInCell.kf.setImage(with: url, placeholder: placeholder)
+            cell.imageInCell.kf.setImage(with: url, placeholder: placeholder) { [weak self, weak cell] _ in
+                guard
+                    let self,
+                    let cell = cell
+                else { return }
+                self.skeleton.stopShimmerAnimation(on: cell.imageInCell)
+            }
         } else {
             cell.imageInCell.image = placeholder
+            self.skeleton.stopShimmerAnimation(on: cell.imageInCell)
         }
     }
     

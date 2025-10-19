@@ -12,6 +12,8 @@ final class ImagesListCell: UITableViewCell {
     
     private let gradientLayer = CAGradientLayer()
     
+    private let skeleton = SkeletonAnimationService()
+    
     override func awakeFromNib() {
         super.awakeFromNib()
         
@@ -44,11 +46,15 @@ final class ImagesListCell: UITableViewCell {
     override func prepareForReuse() {
         super.prepareForReuse()
         
+        skeleton.stopAllShimmerAnimations()
+        
         imageInCell.kf.cancelDownloadTask()
         
         imageInCell.image = UIImage(named: "placeholder") ?? nil
         dataLabel.text = nil
         likeButton.isSelected = false
+        
+        skeleton.startShimmerAnimation(on: imageInCell, cornerRadius: 16)
     }
     
     @IBAction private func likeButtonClicked() {
