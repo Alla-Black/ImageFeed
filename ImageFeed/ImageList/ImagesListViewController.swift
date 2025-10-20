@@ -34,13 +34,13 @@ final class ImagesListViewController: UIViewController {
             if #available(iOS 13.0, *) {
                 let appearance = UITabBarAppearance()
                 appearance.configureWithOpaqueBackground()
-                appearance.backgroundColor = UIColor(named: "YP Black") ?? .black
+                appearance.backgroundColor = UIColor(resource: .ypBlack)
                 tabBar.standardAppearance = appearance
                 if #available(iOS 15.0, *) {
                     tabBar.scrollEdgeAppearance = appearance
                 }
             } else {
-                tabBar.barTintColor = UIColor(named: "YP Black") ?? .black
+                tabBar.barTintColor = UIColor(resource: .ypBlack)
             }
             tabBar.tintColor = .white // Цвет активной иконки/tab label
         }
@@ -149,7 +149,7 @@ extension ImagesListViewController {
         
         cell.imageInCell.kf.indicatorType = .activity
         
-        let placeholder = UIImage(named: "placeholder")
+        let placeholder = UIImage(resource: .placeholder)
         
         self.skeleton.startShimmerAnimation(on: cell.imageInCell, cornerRadius: 16)
         
@@ -196,7 +196,10 @@ extension ImagesListViewController: ImagesListCellDelegate {
         
         UIBlockingProgressHUD.show()
         imagesListService.changeLike(photoId: photo.id, isLike: !photo.isLiked) { [weak self] result in
-            guard let self else { return }
+            guard let self else {
+                UIBlockingProgressHUD.dismiss()
+                return
+            }
             
             switch result {
             case .success:

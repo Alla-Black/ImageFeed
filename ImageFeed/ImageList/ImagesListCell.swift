@@ -18,16 +18,16 @@ final class ImagesListCell: UITableViewCell {
         super.awakeFromNib()
         
         dataLabel.font = UIFont.systemFont(ofSize: 13, weight: .regular)
-        dataLabel.textColor = UIColor(named: "YP White")
+        dataLabel.textColor = UIColor(resource: .ypWhite)
         
-        likeButton.setImage(UIImage(named: "like_button_off"), for: .normal)
-        likeButton.setImage(UIImage(named: "like_button_on"), for: .selected)
+        likeButton.setImage(UIImage(resource: .likeButtonOff), for: .normal)
+        likeButton.setImage(UIImage(resource: .likeButtonOn), for: .selected)
         
         gradientView.layer.cornerRadius = imageInCell.layer.cornerRadius
         gradientView.layer.maskedCorners = [.layerMinXMaxYCorner, .layerMaxXMaxYCorner]
         
-        let topColor = UIColor(named: "YP Black")!.withAlphaComponent(0.0).cgColor
-        let bottomColor = UIColor(named: "YP Black")!.withAlphaComponent(1.0).cgColor
+        let topColor = UIColor(resource: .ypBlack).withAlphaComponent(0.0).cgColor
+        let bottomColor = UIColor(resource: .ypBlack).withAlphaComponent(1.0).cgColor
         
         gradientLayer.colors = [topColor, bottomColor]
         gradientLayer.startPoint = CGPoint(x: 0.5, y: 0.0)
@@ -50,7 +50,7 @@ final class ImagesListCell: UITableViewCell {
         
         imageInCell.kf.cancelDownloadTask()
         
-        imageInCell.image = UIImage(named: "placeholder") ?? nil
+        imageInCell.image = UIImage(resource: .placeholder)
         dataLabel.text = nil
         likeButton.isSelected = false
         
@@ -62,8 +62,7 @@ final class ImagesListCell: UITableViewCell {
     }
     
     func setIsLiked(_ isLiked: Bool) {
-        let image = UIImage(named: isLiked ? "like_button_on" : "like_button_off")
-        likeButton.setImage(image, for: .normal)
+        likeButton.isSelected = isLiked
         likeButton.accessibilityValue = isLiked ? "liked" : "not liked"
     }
 }

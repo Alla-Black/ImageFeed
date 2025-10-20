@@ -23,7 +23,7 @@ final class ProfileViewController: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         
-        view.backgroundColor = UIColor(named: "YP Black")
+        view.backgroundColor = UIColor(resource: .ypBlack)
         
         addViewsToScreen()
         
@@ -117,13 +117,13 @@ final class ProfileViewController: UIViewController {
         [nameW, loginW, descriptionW].forEach { $0?.isActive = false }
     }
     private func addViewsToScreen() {
-        let avatarImage = UIImageView(image: UIImage(named: "photoProfile"))
+        let avatarImage = UIImageView(image: UIImage(resource: .photoProfile))
         
         let nameLabel = UILabel()
         let loginName = UILabel()
         let descriptionLabel = UILabel()
         let logoutButton = UIButton.systemButton(
-            with: UIImage(named: "exitButton")!,
+            with: UIImage(resource: .exitButton),
             target: self,
             action: #selector(didTapLogoutButton)
         )
@@ -137,18 +137,18 @@ final class ProfileViewController: UIViewController {
         profileInformation = [nameLabel, loginName, descriptionLabel, avatarImage]
         
         nameLabel.text = ""
-        nameLabel.textColor = UIColor(named: "YP White")
+        nameLabel.textColor = UIColor(resource: .ypWhite)
         nameLabel.font = UIFont.systemFont(ofSize: 23, weight: .bold)
         
         loginName.text = ""
-        loginName.textColor = UIColor(named: "YP Gray")
+        loginName.textColor = UIColor(resource: .ypGray)
         loginName.font = UIFont.systemFont(ofSize: 13, weight: .regular)
         
         descriptionLabel.text = ""
-        descriptionLabel.textColor = UIColor(named: "YP White")
+        descriptionLabel.textColor = UIColor(resource: .ypWhite)
         descriptionLabel.font = UIFont.systemFont(ofSize: 13, weight: .regular)
         
-        logoutButton.tintColor = UIColor(named: "YP Red")
+        logoutButton.tintColor = UIColor(resource: .ypRed)
         
         avatarImage.translatesAutoresizingMaskIntoConstraints = false
         nameLabel.translatesAutoresizingMaskIntoConstraints = false
@@ -197,7 +197,7 @@ final class ProfileViewController: UIViewController {
         ])
     }
     
-    @objc func didTapLogoutButton () {
+    @objc private func didTapLogoutButton () {
         
         let alert = UIAlertController(
             title: "Пока, пока!",
@@ -205,7 +205,10 @@ final class ProfileViewController: UIViewController {
             preferredStyle: .alert
         )
         let logoutAction = UIAlertAction(title: "Да", style: .default) { [weak self] _ in
-            guard let self else { return }
+            guard let self else {
+                UIBlockingProgressHUD.dismiss()
+                return
+            }
             
             UIBlockingProgressHUD.show()
             

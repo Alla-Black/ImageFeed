@@ -2,15 +2,15 @@ import UIKit
 import ProgressHUD
 
 @main
-class AppDelegate: UIResponder, UIApplicationDelegate {
+final class AppDelegate: UIResponder, UIApplicationDelegate {
 
     func application(
         _ application: UIApplication,
         didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?
     ) -> Bool {
         ProgressHUD.animationType = .activityIndicator
-        ProgressHUD.colorHUD = UIColor(named: "YP White") ?? .white
-        ProgressHUD.colorAnimation = UIColor(named: "YP Black") ?? .black
+        ProgressHUD.colorHUD = UIColor(resource: .ypWhite)
+        ProgressHUD.colorAnimation = UIColor(resource: .ypBlack)
         return true
     }
 

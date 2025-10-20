@@ -8,7 +8,7 @@ final class SplashViewController: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         
-        view.backgroundColor = UIColor(named: "YP Black")
+        view.backgroundColor = UIColor(resource: .ypBlack)
         
         addViewsToScreen()
     }
@@ -28,7 +28,7 @@ final class SplashViewController: UIViewController {
         }
     
     private func addViewsToScreen() {
-        let launchIcon = UIImageView(image: UIImage(named: "launch_Icon"))
+        let launchIcon = UIImageView(image: UIImage(resource: .launchIcon))
         
         launchIcon.translatesAutoresizingMaskIntoConstraints = false
         

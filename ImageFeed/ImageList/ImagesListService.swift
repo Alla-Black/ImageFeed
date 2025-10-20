@@ -49,27 +49,20 @@ final class ImagesListService {
     private var isChangingLike = false
     private var likeTask: URLSessionDataTask?
     
+    private let decoder: JSONDecoder = {
+        let decoder = JSONDecoder()
+        decoder.dateDecodingStrategy = .iso8601
+        return decoder
+    }()
+    
     static let shared = ImagesListService()
     private init() {}
     
     static let didChangeNotification = Notification.Name(rawValue: "ImagesListServiceDidChange")
     
-    private func map(_ r: PhotoResult) -> Photo {
-        .init(
-            id: r.id,
-            size: CGSize(width: CGFloat(r.width), height: CGFloat(r.height)),
-            createdAt: r.createdAt,
-            welcomeDescription: r.description,
-            thumbImageURL: r.urls.small,
-            largeImageURL: r.urls.regular,
-            fullImageURL: r.urls.full,
-            isLiked: r.likedByUser
-            )
-    }
-    
     func fetchPhotosNextPage() {
-        if isLoadingNextPage { return }
-        if currentTask != nil { return }
+        guard !isLoadingNextPage else { return }
+        guard currentTask == nil else { return }
         
         let nextPage = (lastLoadedPage ?? 0) + 1
         isLoadingNextPage = true
@@ -87,7 +80,7 @@ final class ImagesListService {
         let task = URLSession.shared.dataTask(with: request) { [weak self] data, response, error in
             guard let self else { return }
             
-            if let error = error {
+            if let error {
                 DispatchQueue.main.async {
                     self.isLoadingNextPage = false
                     self.currentTask = nil
@@ -110,8 +103,6 @@ final class ImagesListService {
             }
             
             do {
-                let decoder = JSONDecoder()
-                decoder.dateDecodingStrategy = .iso8601
                 let results = try decoder.decode([PhotoResult].self, from: data)
                 
                 let newPhotos = results.map { self.map($0) }
@@ -143,6 +134,19 @@ final class ImagesListService {
         task.resume()
     }
     
+    private func map(_ r: PhotoResult) -> Photo {
+        .init(
+            id: r.id,
+            size: CGSize(width: CGFloat(r.width), height: CGFloat(r.height)),
+            createdAt: r.createdAt,
+            welcomeDescription: r.description,
+            thumbImageURL: r.urls.small,
+            largeImageURL: r.urls.regular,
+            fullImageURL: r.urls.full,
+            isLiked: r.likedByUser
+            )
+    }
+    
     private func makePhotoRequest(token: String, page: Int) -> URLRequest? {
         var urlComponents = URLComponents()
         urlComponents.scheme = Constants.defaultScheme
@@ -159,7 +163,7 @@ final class ImagesListService {
         }
         
         var request = URLRequest(url: photosUrl)
-        request.httpMethod = "GET"
+        request.httpMethod = HTTPMethod.get.rawValue
         request.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
         request.setValue("application/json", forHTTPHeaderField: "Accept")
         
@@ -210,8 +214,6 @@ final class ImagesListService {
             }
             
             do {
-                let decoder = JSONDecoder()
-                decoder.dateDecodingStrategy = .iso8601
                 let likeResponse = try decoder.decode(LikeResponse.self, from: data)
                 let photoResult = likeResponse.photo
                 let updatedPhoto = self.map(photoResult)
@@ -252,7 +254,7 @@ final class ImagesListService {
         }
         
         var request = URLRequest(url: statusLikeUrl)
-        request.httpMethod = isLike ? "POST" : "DELETE"
+        request.httpMethod = isLike ? HTTPMethod.post.rawValue : HTTPMethod.delete.rawValue
         request.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
         request.setValue("application/json", forHTTPHeaderField: "Accept")
         
