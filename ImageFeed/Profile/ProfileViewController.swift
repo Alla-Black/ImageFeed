@@ -16,6 +16,10 @@ final class ProfileViewController: UIViewController {
     private var didStartSkeleton = false
     private var isProfileDetailsLoaded = false
     
+    private var nameW: NSLayoutConstraint?
+    private var loginW: NSLayoutConstraint?
+    private var descriptionW: NSLayoutConstraint?
+    
     override func viewDidLoad() {
         super.viewDidLoad()
         
@@ -24,7 +28,7 @@ final class ProfileViewController: UIViewController {
         addViewsToScreen()
         
         if let profile = ProfileService.profileService.profile {
-            DispatchQueue.main.async { [weak self] in
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) { [weak self] in
                 self?.updateProfileDetails(with: profile)
             }
         }
@@ -109,6 +113,8 @@ final class ProfileViewController: UIViewController {
         if let descriptionLabel { skeleton.stopShimmerAnimation(on: descriptionLabel)
         }
         isProfileDetailsLoaded = true
+        
+        [nameW, loginW, descriptionW].forEach { $0?.isActive = false }
     }
     private func addViewsToScreen() {
         let avatarImage = UIImageView(image: UIImage(named: "photoProfile"))
@@ -130,17 +136,15 @@ final class ProfileViewController: UIViewController {
         
         profileInformation = [nameLabel, loginName, descriptionLabel, avatarImage]
         
-        nameLabel.text = "Екатерина Новикова"
+        nameLabel.text = ""
         nameLabel.textColor = UIColor(named: "YP White")
         nameLabel.font = UIFont.systemFont(ofSize: 23, weight: .bold)
         
-        
-        
-        loginName.text = "@ekaterina_nov"
+        loginName.text = ""
         loginName.textColor = UIColor(named: "YP Gray")
         loginName.font = UIFont.systemFont(ofSize: 13, weight: .regular)
         
-        descriptionLabel.text = "Hello, world!"
+        descriptionLabel.text = ""
         descriptionLabel.textColor = UIColor(named: "YP White")
         descriptionLabel.font = UIFont.systemFont(ofSize: 13, weight: .regular)
         
@@ -157,6 +161,19 @@ final class ProfileViewController: UIViewController {
         view.addSubview(loginName)
         view.addSubview(descriptionLabel)
         view.addSubview(logoutButton)
+        
+        nameW = nameLabel.widthAnchor.constraint(equalToConstant: 223)
+        loginW = loginName.widthAnchor.constraint(equalToConstant: 89)
+        descriptionW = descriptionLabel.widthAnchor.constraint(equalToConstant: 67)
+        
+        NSLayoutConstraint.activate([
+            nameW!,
+            nameLabel.heightAnchor.constraint(equalToConstant: 18),
+            loginW!,
+            loginName.heightAnchor.constraint(equalToConstant: 18),
+            descriptionW!,
+            descriptionLabel.heightAnchor.constraint(equalToConstant: 18)
+        ])
         
         NSLayoutConstraint.activate([
             avatarImage.widthAnchor.constraint(equalToConstant: 70),

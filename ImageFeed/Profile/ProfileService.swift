@@ -10,7 +10,7 @@ struct Profile {
 struct ProfileResult: Codable {
     let username: String
     let first_name: String
-    let last_name: String
+    let last_name: String?
     let bio: String?
     
     enum CodingKeys: String, CodingKey {
@@ -45,12 +45,15 @@ final class ProfileService {
             switch result {
             case .success(let data):
                 
-                    let profile = Profile(
-                        username: data.username,
-                        name: "\(data.first_name) \(data.last_name)",
-                        loginName: "@\(data.username)",
-                        bio: data.bio
-                    )
+                let lastName = data.last_name ?? ""
+                let fullName = "\(data.first_name) \(lastName)".trimmingCharacters(in: .whitespaces)
+                
+                let profile = Profile(
+                    username: data.username,
+                    name: fullName,
+                    loginName: "@\(data.username)",
+                    bio: data.bio
+                )
                     
                 self.profile = profile
                 completion(.success(profile))
