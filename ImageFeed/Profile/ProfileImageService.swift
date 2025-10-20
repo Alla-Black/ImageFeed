@@ -72,10 +72,22 @@ final class ProfileImageService {
             return nil }
         
         var request = URLRequest(url: url)
-        request.httpMethod = "GET"
+        request.httpMethod = HTTPMethod.get.rawValue
         request.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
         
         return request
+    }
+    
+    func reset() {
+        task?.cancel()
+        task = nil
+        
+        avatarURL = nil
+        
+        NotificationCenter.default.post(
+            name: ProfileImageService.didChangeNotification,
+            object: self
+        )
     }
 }
 

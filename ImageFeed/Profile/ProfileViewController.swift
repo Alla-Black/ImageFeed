@@ -1,5 +1,6 @@
 import UIKit
 import Kingfisher
+import ProgressHUD
 
 final class ProfileViewController: UIViewController {
     private var nameLabel: UILabel?
@@ -11,16 +12,25 @@ final class ProfileViewController: UIViewController {
     
     private var profileImageServiceObserver: NSObjectProtocol?
     
+    private let skeleton = SkeletonAnimationService()
+    private var didStartSkeleton = false
+    private var isProfileDetailsLoaded = false
+    
+    private var nameW: NSLayoutConstraint?
+    private var loginW: NSLayoutConstraint?
+    private var descriptionW: NSLayoutConstraint?
     
     override func viewDidLoad() {
         super.viewDidLoad()
         
-        view.backgroundColor = UIColor(named: "YP Black")
+        view.backgroundColor = UIColor(resource: .ypBlack)
         
         addViewsToScreen()
         
         if let profile = ProfileService.profileService.profile {
-            updateProfileDetails(with: profile)
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) { [weak self] in
+                self?.updateProfileDetails(with: profile)
+            }
         }
         
         profileImageServiceObserver = NotificationCenter.default.addObserver(
@@ -34,11 +44,35 @@ final class ProfileViewController: UIViewController {
         updateAvatar()
     }
     
+    override func viewDidLayoutSubviews() {
+        super.viewDidLayoutSubviews()
+        guard !didStartSkeleton else { return }
+        didStartSkeleton = true
+        
+        if let avatarImage, (avatarImage.image == nil || avatarImage.image == UIImage(resource: .emptyAvatar)) {
+            skeleton.startShimmerAnimation(on: avatarImage, cornerRadius: 35)
+        }
+        if let nameLabel {
+            skeleton.startShimmerAnimation(on: nameLabel, cornerRadius: 9)
+        }
+        if let loginName {
+            skeleton.startShimmerAnimation(on: loginName, cornerRadius: 9)
+        }
+        if let descriptionLabel {
+            skeleton.startShimmerAnimation(on: descriptionLabel, cornerRadius: 9)
+        }
+    }
+    
     private func updateAvatar() {
         guard
             let profileImageURL = ProfileImageService.shared.avatarURL,
             let url = URL(string: profileImageURL)
-        else { return }
+        else {
+            avatarImage?.kf.cancelDownloadTask()
+            avatarImage?.image = UIImage(resource: .emptyAvatar)
+            if let avatarImage { skeleton.stopShimmerAnimation(on: avatarImage) }
+            return
+        }
         let processor = RoundCornerImageProcessor(cornerRadius: 35)
         avatarImage?.kf.indicatorType = .activity
         avatarImage?.kf.setImage(with: url,
@@ -47,7 +81,7 @@ final class ProfileViewController: UIViewController {
                                            .scaleFactor(UIScreen.main.scale),
                                            .cacheOriginalImage,
                                            .forceRefresh
-                                 ]) { result in
+                                 ]) { [weak self] result in
             switch result {
             case .success(let value):
                 print(value.image)
@@ -57,27 +91,39 @@ final class ProfileViewController: UIViewController {
             case .failure(let error):
                 print(error)
             }
+            
+            if let avatar = self?.avatarImage {
+                self?.skeleton.stopShimmerAnimation(on: avatar)
+            }
         }
     }
 
     private func updateProfileDetails(with profile: Profile) {
-        nameLabel?.text = profile.name.isEmpty ? "Имя не указано"
-        : profile.name
-        loginName?.text = profile.loginName.isEmpty ? "@неизвестный_пользователь"
-        : profile.loginName
+        nameLabel?.text = profile.name.isEmpty ? "Имя не указано" : profile.name
+        if let nameLabel {
+            skeleton.stopShimmerAnimation(on: nameLabel)
+        }
+        
+        loginName?.text = profile.loginName.isEmpty ? "@неизвестный_пользователь" : profile.loginName
+        if let loginName { skeleton.stopShimmerAnimation(on: loginName)
+        }
+        
         descriptionLabel?.text = (profile.bio?.isEmpty ?? true)
-        ? "Профиль не заполнен"
-        : profile.bio
+        ? "Профиль не заполнен" : profile.bio
+        if let descriptionLabel { skeleton.stopShimmerAnimation(on: descriptionLabel)
+        }
+        isProfileDetailsLoaded = true
+        
+        [nameW, loginW, descriptionW].forEach { $0?.isActive = false }
     }
-    
     private func addViewsToScreen() {
-        let avatarImage = UIImageView(image: UIImage(named: "photoProfile"))
+        let avatarImage = UIImageView(image: UIImage(resource: .photoProfile))
         
         let nameLabel = UILabel()
         let loginName = UILabel()
         let descriptionLabel = UILabel()
         let logoutButton = UIButton.systemButton(
-            with: UIImage(named: "exitButton")!,
+            with: UIImage(resource: .exitButton),
             target: self,
             action: #selector(didTapLogoutButton)
         )
@@ -90,21 +136,19 @@ final class ProfileViewController: UIViewController {
         
         profileInformation = [nameLabel, loginName, descriptionLabel, avatarImage]
         
-        nameLabel.text = "Екатерина Новикова"
-        nameLabel.textColor = UIColor(named: "YP White")
+        nameLabel.text = ""
+        nameLabel.textColor = UIColor(resource: .ypWhite)
         nameLabel.font = UIFont.systemFont(ofSize: 23, weight: .bold)
         
-        
-        
-        loginName.text = "@ekaterina_nov"
-        loginName.textColor = UIColor(named: "YP Gray")
+        loginName.text = ""
+        loginName.textColor = UIColor(resource: .ypGray)
         loginName.font = UIFont.systemFont(ofSize: 13, weight: .regular)
         
-        descriptionLabel.text = "Hello, world!"
-        descriptionLabel.textColor = UIColor(named: "YP White")
+        descriptionLabel.text = ""
+        descriptionLabel.textColor = UIColor(resource: .ypWhite)
         descriptionLabel.font = UIFont.systemFont(ofSize: 13, weight: .regular)
         
-        logoutButton.tintColor = UIColor(named: "YP Red")
+        logoutButton.tintColor = UIColor(resource: .ypRed)
         
         avatarImage.translatesAutoresizingMaskIntoConstraints = false
         nameLabel.translatesAutoresizingMaskIntoConstraints = false
@@ -117,6 +161,19 @@ final class ProfileViewController: UIViewController {
         view.addSubview(loginName)
         view.addSubview(descriptionLabel)
         view.addSubview(logoutButton)
+        
+        nameW = nameLabel.widthAnchor.constraint(equalToConstant: 223)
+        loginW = loginName.widthAnchor.constraint(equalToConstant: 89)
+        descriptionW = descriptionLabel.widthAnchor.constraint(equalToConstant: 67)
+        
+        NSLayoutConstraint.activate([
+            nameW!,
+            nameLabel.heightAnchor.constraint(equalToConstant: 18),
+            loginW!,
+            loginName.heightAnchor.constraint(equalToConstant: 18),
+            descriptionW!,
+            descriptionLabel.heightAnchor.constraint(equalToConstant: 18)
+        ])
         
         NSLayoutConstraint.activate([
             avatarImage.widthAnchor.constraint(equalToConstant: 70),
@@ -140,31 +197,56 @@ final class ProfileViewController: UIViewController {
         ])
     }
     
-    @objc func didTapLogoutButton () {
+    @objc private func didTapLogoutButton () {
         
-        for view in profileInformation {
-            view.removeFromSuperview()
-        }
-        profileInformation.removeAll()
-        
-        nameLabel = nil
-        loginName = nil
-        descriptionLabel = nil
-        avatarImage = nil
-        
-        let emptyAvatar = UIImageView(image: UIImage(named: "emptyAvatar"))
-        emptyAvatar.translatesAutoresizingMaskIntoConstraints = false
-        view.addSubview(emptyAvatar)
-        guard let logoutButton = self.logoutButton else { return }
-        
-        NSLayoutConstraint.activate([
-            emptyAvatar.widthAnchor.constraint(equalToConstant: 70),
-            emptyAvatar.heightAnchor.constraint(equalToConstant: 70),
-            emptyAvatar.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 16),
-            emptyAvatar.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: 32),
+        let alert = UIAlertController(
+            title: "Пока, пока!",
+            message: "Уверены, что хотите выйти?",
+            preferredStyle: .alert
+        )
+        let logoutAction = UIAlertAction(title: "Да", style: .default) { [weak self] _ in
+            guard let self else {
+                UIBlockingProgressHUD.dismiss()
+                return
+            }
             
-            logoutButton.centerYAnchor.constraint(equalTo: emptyAvatar.centerYAnchor)
-            ])
+            UIBlockingProgressHUD.show()
+            
+            ProfileLogoutService.shared.logout()
+            
+            for view in profileInformation {
+                view.removeFromSuperview()
+            }
+            profileInformation.removeAll()
+            
+            self.nameLabel = nil
+            self.loginName = nil
+            self.descriptionLabel = nil
+            self.avatarImage = nil
+            
+            self.skeleton.stopAllShimmerAnimations()
+            
+            UIBlockingProgressHUD.dismiss()
+            
+            self.switchToSplashRoot()
+            }
+        
+        let cancelAction = UIAlertAction(title: "Нет", style: .default)
+        
+        alert.addAction(logoutAction)
+        alert.addAction(cancelAction)
+            
+        present(alert, animated: true)
+    }
+    
+    private func switchToSplashRoot() {
+        DispatchQueue.main.async {
+            if let windowScene = UIApplication.shared.connectedScenes.first as? UIWindowScene,
+               let window = windowScene.windows.first {
+                window.rootViewController = SplashViewController()
+                window.makeKeyAndVisible()
+            }
+        }
     }
     
     deinit {
