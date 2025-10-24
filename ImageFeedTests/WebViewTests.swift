@@ -20,6 +20,21 @@ final class WebViewTests: XCTestCase {
         //then
         XCTAssertTrue(presenter.viewDidLoadCalled)
     }
+    
+    func testPresenterCallsLoadRequest() {
+        //given
+        let helper = AuthHelperStub()
+        let presenter = WebViewPresenter(authHelper: helper)
+        
+        let webViewSpy = WebViewViewControllerSpy()
+        presenter.view = webViewSpy
+        
+        //when
+        presenter.viewDidLoad()
+        
+        //then
+        XCTAssertTrue(webViewSpy.loadRequestCalled)
+    }
 }
 
 final class WebViewPresenterSpy: WebViewPresenterProtocol {
@@ -32,6 +47,33 @@ final class WebViewPresenterSpy: WebViewPresenterProtocol {
     
     func didUpdateProgressValue(_ newValue: Double) {
         
+    }
+    
+    func code(from url: URL) -> String? {
+        return nil
+    }
+}
+
+final class WebViewViewControllerSpy: WebViewViewControllerProtocol {
+    var loadRequestCalled: Bool = false
+    var presenter: WebViewPresenterProtocol?
+    
+    func load(request: URLRequest) {
+        loadRequestCalled = true
+    }
+    func setProgressValue(_ newValue: Float) {
+        
+    }
+    func setProgressHidden(_ isHidden: Bool) {
+        
+    }
+}
+
+final class AuthHelperStub: AuthHelperProtocol {
+    func authRequest() -> URLRequest? {
+        guard let url = URL(string: "https://example.com") else { return nil }
+        
+        return URLRequest(url: url)
     }
     
     func code(from url: URL) -> String? {
