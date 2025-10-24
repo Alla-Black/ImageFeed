@@ -287,7 +287,7 @@
         <!--Web View View Controller-->
         <scene sceneID="oB4-fI-Oac">
             <objects>
-                <viewController hidesBottomBarWhenPushed="YES" id="x1E-Kv-ltw" customClass="WebViewViewController" customModule="ImageFeed" customModuleProvider="target" sceneMemberID="viewController">
+                <viewController storyboardIdentifier="WebViewViewController" hidesBottomBarWhenPushed="YES" id="x1E-Kv-ltw" customClass="WebViewViewController" customModule="ImageFeed" customModuleProvider="target" sceneMemberID="viewController">
                     <view key="view" contentMode="scaleToFill" id="xFk-7o-XR6">
                         <rect key="frame" x="0.0" y="0.0" width="414" height="896"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
