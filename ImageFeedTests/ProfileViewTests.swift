@@ -177,6 +177,35 @@ final class ProfileViewTests: XCTestCase {
         XCTAssertEqual(viewSpy.receivedURL, "https://new.url")
     }
     
+    func testPresenterFormatsEmptyProfileFieldsWithPlaceholders() {
+        // given
+        let profileStub = ProfileServiceStub()
+        profileStub.profile = Profile(
+            username: "testUser",
+            name: "",
+            loginName: "",
+            bio: ""
+        )
+        
+        let presenter = ProfilePresenter(profileService: profileStub)
+        let viewSpy = ProfileViewControllerSpy()
+        presenter.view = viewSpy
+        
+        // when
+        presenter.viewDidLoad()
+        
+        // then
+        let exp = expectation(description: "wait placeholders")
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.6) {
+            exp.fulfill()
+        }
+        wait(for: [exp], timeout: 1.0)
+        
+        XCTAssertEqual(viewSpy.receivedName, "Имя не указано")
+        XCTAssertEqual(viewSpy.receivedLogin, "@неизвестный_пользователь")
+        XCTAssertEqual(viewSpy.receivedBio, "Профиль не заполнен")
+    }
+    
 }
 
 final class ProfilePresenterSpy: ProfilePresenterProtocol {
