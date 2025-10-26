@@ -2,6 +2,20 @@ import UIKit
 import Kingfisher
 import ProgressHUD
 
+public protocol ProfileViewControllerProtocol: AnyObject {
+    var presenter: ProfilePresenterProtocol? { get set }
+    
+    func setProfile(name: String?, login: String?, bio: String?)
+    func setAvatar(urlString: String?)
+    func showLogoutAlert()
+    func showBlockingHUD(_ show: Bool)
+    func clearProfileUI()
+    func switchToSplashRoot()
+    
+    func showLoadingSkeleton()
+    func hideLoadingSkeleton()
+}
+
 final class ProfileViewController: UIViewController {
     private var nameLabel: UILabel?
     private var loginName: UILabel?
@@ -10,15 +24,13 @@ final class ProfileViewController: UIViewController {
     private var logoutButton: UIButton?
     private var profileInformation: [UIView] = []
     
-    private var profileImageServiceObserver: NSObjectProtocol?
-    
     private let skeleton = SkeletonAnimationService()
-    private var didStartSkeleton = false
-    private var isProfileDetailsLoaded = false
     
     private var nameW: NSLayoutConstraint?
     private var loginW: NSLayoutConstraint?
     private var descriptionW: NSLayoutConstraint?
+    
+    var presenter: ProfilePresenterProtocol?
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -27,97 +39,11 @@ final class ProfileViewController: UIViewController {
         
         addViewsToScreen()
         
-        if let profile = ProfileService.profileService.profile {
-            DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) { [weak self] in
-                self?.updateProfileDetails(with: profile)
-            }
-        }
-        
-        profileImageServiceObserver = NotificationCenter.default.addObserver(
-            forName: ProfileImageService.didChangeNotification,
-            object: nil,
-            queue: .main
-        ) { [weak self] _ in
-            guard let self else { return }
-            self.updateAvatar()
-        }
-        updateAvatar()
+        presenter?.viewDidLoad()
     }
     
-    override func viewDidLayoutSubviews() {
-        super.viewDidLayoutSubviews()
-        guard !didStartSkeleton else { return }
-        didStartSkeleton = true
-        
-        if let avatarImage, (avatarImage.image == nil || avatarImage.image == UIImage(resource: .emptyAvatar)) {
-            skeleton.startShimmerAnimation(on: avatarImage, cornerRadius: 35)
-        }
-        if let nameLabel {
-            skeleton.startShimmerAnimation(on: nameLabel, cornerRadius: 9)
-        }
-        if let loginName {
-            skeleton.startShimmerAnimation(on: loginName, cornerRadius: 9)
-        }
-        if let descriptionLabel {
-            skeleton.startShimmerAnimation(on: descriptionLabel, cornerRadius: 9)
-        }
-    }
-    
-    private func updateAvatar() {
-        guard
-            let profileImageURL = ProfileImageService.shared.avatarURL,
-            let url = URL(string: profileImageURL)
-        else {
-            avatarImage?.kf.cancelDownloadTask()
-            avatarImage?.image = UIImage(resource: .emptyAvatar)
-            if let avatarImage { skeleton.stopShimmerAnimation(on: avatarImage) }
-            return
-        }
-        let processor = RoundCornerImageProcessor(cornerRadius: 35)
-        avatarImage?.kf.indicatorType = .activity
-        avatarImage?.kf.setImage(with: url,
-                                 placeholder: UIImage(resource: .emptyAvatar),
-                                 options: [.processor(processor),
-                                           .scaleFactor(UIScreen.main.scale),
-                                           .cacheOriginalImage,
-                                           .forceRefresh
-                                 ]) { [weak self] result in
-            switch result {
-            case .success(let value):
-                print(value.image)
-                print(value.cacheType)
-                print(value.source)
-                
-            case .failure(let error):
-                print(error)
-            }
-            
-            if let avatar = self?.avatarImage {
-                self?.skeleton.stopShimmerAnimation(on: avatar)
-            }
-        }
-    }
-
-    private func updateProfileDetails(with profile: Profile) {
-        nameLabel?.text = profile.name.isEmpty ? "Имя не указано" : profile.name
-        if let nameLabel {
-            skeleton.stopShimmerAnimation(on: nameLabel)
-        }
-        
-        loginName?.text = profile.loginName.isEmpty ? "@неизвестный_пользователь" : profile.loginName
-        if let loginName { skeleton.stopShimmerAnimation(on: loginName)
-        }
-        
-        descriptionLabel?.text = (profile.bio?.isEmpty ?? true)
-        ? "Профиль не заполнен" : profile.bio
-        if let descriptionLabel { skeleton.stopShimmerAnimation(on: descriptionLabel)
-        }
-        isProfileDetailsLoaded = true
-        
-        [nameW, loginW, descriptionW].forEach { $0?.isActive = false }
-    }
     private func addViewsToScreen() {
-        let avatarImage = UIImageView(image: UIImage(resource: .photoProfile))
+        let avatarImage = UIImageView(image: UIImage(resource: .emptyAvatar))
         
         let nameLabel = UILabel()
         let loginName = UILabel()
@@ -198,48 +124,99 @@ final class ProfileViewController: UIViewController {
     }
     
     @objc private func didTapLogoutButton () {
+        presenter?.didTapLogout()
+    }
+}
+
+// MARK: - ProfileViewControllerProtocol
+extension ProfileViewController: ProfileViewControllerProtocol {
+    func configure(_ presenter: ProfilePresenterProtocol) {
+        self.presenter = presenter
+        presenter.view = self
+    }
+    
+    func setProfile(name: String?, login: String?, bio: String?) {
+        nameLabel?.text = name
+        if let nameLabel {
+            skeleton.stopShimmerAnimation(on: nameLabel)
+        }
         
+        loginName?.text = login
+        if let loginName { skeleton.stopShimmerAnimation(on: loginName)
+        }
+        
+        descriptionLabel?.text = bio
+        if let descriptionLabel { skeleton.stopShimmerAnimation(on: descriptionLabel)
+        }
+        
+        [nameW, loginW, descriptionW].forEach { $0?.isActive = false }
+    }
+    
+    func setAvatar(urlString: String?) {
+        guard let urlString, let url = URL(string: urlString) else {
+            avatarImage?.kf.cancelDownloadTask()
+            avatarImage?.image = UIImage(resource: .emptyAvatar)
+            return
+        }
+        
+        let processor = RoundCornerImageProcessor(cornerRadius: 35)
+        avatarImage?.kf.indicatorType = .activity
+        avatarImage?.kf.setImage(with: url,
+                                 placeholder: UIImage(resource: .emptyAvatar),
+                                 options: [.processor(processor),
+                                           .scaleFactor(UIScreen.main.scale),
+                                           .cacheOriginalImage,
+                                           .forceRefresh
+                                 ]) { [weak self] result in
+            
+            if let avatar = self?.avatarImage {
+                self?.skeleton.stopShimmerAnimation(on: avatar)
+            }
+        }
+    }
+    
+    func showLogoutAlert() {
         let alert = UIAlertController(
             title: "Пока, пока!",
             message: "Уверены, что хотите выйти?",
             preferredStyle: .alert
         )
+        
         let logoutAction = UIAlertAction(title: "Да", style: .default) { [weak self] _ in
-            guard let self else {
-                UIBlockingProgressHUD.dismiss()
-                return
+            self?.presenter?.confirmLogout()
             }
             
+            let cancelAction = UIAlertAction(title: "Нет", style: .default)
+            
+            alert.addAction(logoutAction)
+            alert.addAction(cancelAction)
+            
+            present(alert, animated: true)
+        }
+    
+    func showBlockingHUD(_ show: Bool) {
+        if show {
             UIBlockingProgressHUD.show()
-            
-            ProfileLogoutService.shared.logout()
-            
-            for view in profileInformation {
-                view.removeFromSuperview()
-            }
-            profileInformation.removeAll()
-            
-            self.nameLabel = nil
-            self.loginName = nil
-            self.descriptionLabel = nil
-            self.avatarImage = nil
-            
-            self.skeleton.stopAllShimmerAnimations()
-            
+        } else {
             UIBlockingProgressHUD.dismiss()
-            
-            self.switchToSplashRoot()
-            }
-        
-        let cancelAction = UIAlertAction(title: "Нет", style: .default)
-        
-        alert.addAction(logoutAction)
-        alert.addAction(cancelAction)
-            
-        present(alert, animated: true)
+        }
     }
     
-    private func switchToSplashRoot() {
+    func clearProfileUI() {
+        for view in profileInformation {
+            view.removeFromSuperview()
+        }
+        profileInformation.removeAll()
+        
+        self.nameLabel = nil
+        self.loginName = nil
+        self.descriptionLabel = nil
+        self.avatarImage = nil
+        
+        self.skeleton.stopAllShimmerAnimations()
+    }
+    
+    func switchToSplashRoot() {
         DispatchQueue.main.async {
             if let windowScene = UIApplication.shared.connectedScenes.first as? UIWindowScene,
                let window = windowScene.windows.first {
@@ -249,9 +226,30 @@ final class ProfileViewController: UIViewController {
         }
     }
     
-    deinit {
-        if let observer = profileImageServiceObserver {
-            NotificationCenter.default.removeObserver(observer)
+    func showLoadingSkeleton() {
+        view.layoutIfNeeded()
+        
+        DispatchQueue.main.async { [weak self] in
+            guard let self else { return }
+            
+            if let avatarImage, (avatarImage.image == nil || avatarImage.image == UIImage(resource: .emptyAvatar)) {
+                self.skeleton.startShimmerAnimation(on: avatarImage, cornerRadius: 35)
+            }
+            if let nameLabel {
+                self.skeleton.startShimmerAnimation(on: nameLabel, cornerRadius: 9)
+            }
+            if let loginName {
+                self.skeleton.startShimmerAnimation(on: loginName, cornerRadius: 9)
+            }
+            if let descriptionLabel {
+                self.skeleton.startShimmerAnimation(on: descriptionLabel, cornerRadius: 9)
+            }
         }
+    }
+    
+    func hideLoadingSkeleton() {
+        if let nameLabel { skeleton.stopShimmerAnimation(on: nameLabel) }
+        if let loginName { skeleton.stopShimmerAnimation(on: loginName) }
+        if let descriptionLabel { skeleton.stopShimmerAnimation(on: descriptionLabel) }
     }
 }
