@@ -49,9 +49,38 @@ final class ProfileViewTests: XCTestCase {
         }
         wait(for: [exp], timeout: 1.0)
         
-        //then
         XCTAssertTrue(viewSpy.setAvatarCalled)
         XCTAssertEqual(viewSpy.receivedURL, "https://example.com/avatar.png")
+    }
+    
+    func testPresenterCallsSetProfile() {
+        //given
+        let profileStub = ProfileServiceStub()
+        profileStub.profile = Profile(
+            username: "testUser",
+            name: "Имя",
+            loginName: "@login",
+            bio: "Описание"
+        )
+        
+        let presenter = ProfilePresenter(profileService: profileStub)
+        let viewSpy = ProfileViewControllerSpy()
+        presenter.view = viewSpy
+        
+        //when
+        presenter.viewDidLoad()
+        
+        //then
+        let exp = expectation(description: "wait setProfile")
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.6) {
+            exp.fulfill()
+        }
+        wait(for: [exp], timeout: 1.0)
+        
+        XCTAssertTrue(viewSpy.setProfileCalled)
+        XCTAssertEqual(viewSpy.receivedName, "Имя")
+        XCTAssertEqual(viewSpy.receivedLogin, "@login")
+        XCTAssertEqual(viewSpy.receivedBio, "Описание")
     }
 }
 
@@ -77,8 +106,16 @@ final class ProfileViewControllerSpy: ProfileViewControllerProtocol {
     var showLoadingSkeletonCalled: Bool = false
     var setAvatarCalled: Bool = false
     var receivedURL: String?
+    var setProfileCalled = false
+    var receivedName: String?
+    var receivedLogin: String?
+    var receivedBio: String?
     
     func setProfile(name: String?, login: String?, bio: String?) {
+        setProfileCalled = true
+        receivedName = name
+        receivedLogin = login
+        receivedBio = bio
         
     }
     
@@ -115,4 +152,8 @@ final class ProfileViewControllerSpy: ProfileViewControllerProtocol {
 final class ProfileImageServiceStub: ProfileImageServiceProtocol {
     var avatarURL: String?
     let didChangeNotification = Notification.Name("ProfileImageServiceStub.didChange")
+}
+
+final class ProfileServiceStub: ProfileServiceProtocol {
+    var profile: Profile?
 }

@@ -13,9 +13,14 @@ final class ProfilePresenter: ProfilePresenterProtocol {
     private var imageObserver: NSObjectProtocol?
     
     private let imageService: ProfileImageServiceProtocol
+    private let profileService: ProfileServiceProtocol
     
-    init(imageService: ProfileImageServiceProtocol = ProfileImageService.shared) {
+    init(
+        imageService: ProfileImageServiceProtocol = ProfileImageService.shared,
+        profileService: ProfileServiceProtocol = ProfileService.profileService
+    ) {
         self.imageService = imageService
+        self.profileService = profileService
     }
     
     func viewDidLoad() {
@@ -43,7 +48,7 @@ final class ProfilePresenter: ProfilePresenterProtocol {
             view?.setAvatar(urlString: nil)
         }
         
-        guard let profile = ProfileService.profileService.profile else {
+        guard let profile = profileService.profile else {
             return
         }
         

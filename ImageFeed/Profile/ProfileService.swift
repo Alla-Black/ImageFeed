@@ -1,5 +1,9 @@
 import Foundation
 
+protocol ProfileServiceProtocol {
+    var profile: Profile? { get }
+}
+
 struct Profile {
     let username: String
     let name: String
@@ -91,4 +95,6 @@ final class ProfileService {
     }
 }
 
+//MARK: - ProfileServiceProtocol
+extension ProfileService: ProfileServiceProtocol {}
 
