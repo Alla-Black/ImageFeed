@@ -48,10 +48,9 @@ final class ProfilePresenter: ProfilePresenterProtocol {
         let bio = (profile.bio?.isEmpty ?? true) ? "Профиль не заполнен" : profile.bio
         
         DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) { [weak self] in
-            self?.view?.setProfile(name: name, login: login, bio: bio)
-            DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) { [weak self] in
-                self?.view?.hideLoadingSkeleton()
-            }
+            guard let self else { return }
+            self.view?.setProfile(name: name, login: login, bio: bio)
+            self.view?.hideLoadingSkeleton()
         }
     }
     
