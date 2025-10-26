@@ -82,6 +82,33 @@ final class ProfileViewTests: XCTestCase {
         XCTAssertEqual(viewSpy.receivedLogin, "@login")
         XCTAssertEqual(viewSpy.receivedBio, "Описание")
     }
+    
+    func testPresenterHideLoadingSkeleton() {
+        //given
+        let profileStub = ProfileServiceStub()
+        profileStub.profile = Profile(
+            username: "testUser",
+            name: "Имя",
+            loginName: "@login",
+            bio: "Описание"
+        )
+        
+        let presenter = ProfilePresenter(profileService: profileStub)
+        let viewSpy = ProfileViewControllerSpy()
+        presenter.view = viewSpy
+        
+        //when
+        presenter.viewDidLoad()
+        
+        //then
+        let exp = expectation(description: "wait hideLoadingSkeleton")
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.6) {
+            exp.fulfill()
+        }
+        wait(for: [exp], timeout: 1.0)
+        
+        XCTAssertTrue(viewSpy.hideLoadingSkeletonCalled)
+    }
 }
 
 final class ProfilePresenterSpy: ProfilePresenterProtocol {
@@ -110,6 +137,7 @@ final class ProfileViewControllerSpy: ProfileViewControllerProtocol {
     var receivedName: String?
     var receivedLogin: String?
     var receivedBio: String?
+    var hideLoadingSkeletonCalled: Bool = false
     
     func setProfile(name: String?, login: String?, bio: String?) {
         setProfileCalled = true
@@ -145,7 +173,7 @@ final class ProfileViewControllerSpy: ProfileViewControllerProtocol {
     }
     
     func hideLoadingSkeleton() {
-        
+        hideLoadingSkeletonCalled = true
     }
 }
 
