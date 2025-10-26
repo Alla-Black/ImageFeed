@@ -140,6 +140,23 @@ final class ProfileViewTests: XCTestCase {
         XCTAssertTrue(viewSpy.switchToSplashRootCalled)
     }
     
+    func testPresenterSetsNilAvatarWhenNoURL() {
+        //given
+        let imageStub = ProfileImageServiceStub()
+        let presenter = ProfilePresenter(imageService: imageStub)
+        
+        let viewSpy = ProfileViewControllerSpy(); presenter.view = viewSpy
+        
+        //when
+        presenter.viewDidLoad()
+        
+        //then
+        XCTAssertTrue(viewSpy.setAvatarCalled)
+        XCTAssertNil(viewSpy.receivedURL)
+        XCTAssertEqual(viewSpy.setAvatarCallCount, 1)
+    }
+    
+    
 }
 
 final class ProfilePresenterSpy: ProfilePresenterProtocol {
@@ -173,6 +190,7 @@ final class ProfileViewControllerSpy: ProfileViewControllerProtocol {
     var showBlockingHUDCalls: [Bool] = []
     var clearProfileUICalled = false
     var switchToSplashRootCalled = false
+    var setAvatarCallCount = 0
     
     func setProfile(name: String?, login: String?, bio: String?) {
         setProfileCalled = true
@@ -185,6 +203,7 @@ final class ProfileViewControllerSpy: ProfileViewControllerProtocol {
     func setAvatar(urlString: String?) {
         setAvatarCalled = true
         receivedURL = urlString
+        setAvatarCallCount += 1
     }
     
     func showLogoutAlert() {
