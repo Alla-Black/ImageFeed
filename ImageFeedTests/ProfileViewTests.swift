@@ -109,6 +109,20 @@ final class ProfileViewTests: XCTestCase {
         
         XCTAssertTrue(viewSpy.hideLoadingSkeletonCalled)
     }
+    
+    func testPresenterShowLogoutAlert() {
+        //given
+        let presenter = ProfilePresenter()
+        let viewSpy = ProfileViewControllerSpy()
+        presenter.view = viewSpy
+        
+        //when
+        presenter.didTapLogout()
+        
+        //then
+        XCTAssertTrue(viewSpy.showLogoutAlertCalled)
+    }
+    
 }
 
 final class ProfilePresenterSpy: ProfilePresenterProtocol {
@@ -138,6 +152,7 @@ final class ProfileViewControllerSpy: ProfileViewControllerProtocol {
     var receivedLogin: String?
     var receivedBio: String?
     var hideLoadingSkeletonCalled: Bool = false
+    var showLogoutAlertCalled: Bool = false
     
     func setProfile(name: String?, login: String?, bio: String?) {
         setProfileCalled = true
@@ -153,7 +168,7 @@ final class ProfileViewControllerSpy: ProfileViewControllerProtocol {
     }
     
     func showLogoutAlert() {
-        
+        showLogoutAlertCalled = true
     }
     
     func showBlockingHUD(_ show: Bool) {
