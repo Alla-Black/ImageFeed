@@ -123,6 +123,23 @@ final class ProfileViewTests: XCTestCase {
         XCTAssertTrue(viewSpy.showLogoutAlertCalled)
     }
     
+    func testPresenterConfirmLogoutCallsAllExpectedActions() {
+        // given
+        let logoutSpy = ProfileLogoutServiceSpy()
+        let viewSpy = ProfileViewControllerSpy()
+        let presenter = ProfilePresenter(profileLogoutService: logoutSpy)
+        presenter.view = viewSpy
+        
+        // when
+        presenter.confirmLogout()
+        
+        // then
+        XCTAssertEqual(viewSpy.showBlockingHUDCalls, [true, false])
+        XCTAssertTrue(logoutSpy.logoutCalled)
+        XCTAssertTrue(viewSpy.clearProfileUICalled)
+        XCTAssertTrue(viewSpy.switchToSplashRootCalled)
+    }
+    
 }
 
 final class ProfilePresenterSpy: ProfilePresenterProtocol {
@@ -153,6 +170,9 @@ final class ProfileViewControllerSpy: ProfileViewControllerProtocol {
     var receivedBio: String?
     var hideLoadingSkeletonCalled: Bool = false
     var showLogoutAlertCalled: Bool = false
+    var showBlockingHUDCalls: [Bool] = []
+    var clearProfileUICalled = false
+    var switchToSplashRootCalled = false
     
     func setProfile(name: String?, login: String?, bio: String?) {
         setProfileCalled = true
@@ -172,15 +192,15 @@ final class ProfileViewControllerSpy: ProfileViewControllerProtocol {
     }
     
     func showBlockingHUD(_ show: Bool) {
-        
+        showBlockingHUDCalls.append(show)
     }
     
     func clearProfileUI() {
-        
+        clearProfileUICalled = true
     }
     
     func switchToSplashRoot() {
-        
+        switchToSplashRootCalled = true
     }
     
     func showLoadingSkeleton() {
@@ -199,4 +219,12 @@ final class ProfileImageServiceStub: ProfileImageServiceProtocol {
 
 final class ProfileServiceStub: ProfileServiceProtocol {
     var profile: Profile?
+}
+
+final class ProfileLogoutServiceSpy: ProfileLogoutServiceProtocol {
+    var logoutCalled: Bool = false
+    
+    func logout() {
+        logoutCalled = true
+    }
 }

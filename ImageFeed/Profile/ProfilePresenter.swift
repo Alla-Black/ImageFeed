@@ -14,13 +14,16 @@ final class ProfilePresenter: ProfilePresenterProtocol {
     
     private let imageService: ProfileImageServiceProtocol
     private let profileService: ProfileServiceProtocol
+    private let profileLogoutService: ProfileLogoutServiceProtocol
     
     init(
         imageService: ProfileImageServiceProtocol = ProfileImageService.shared,
-        profileService: ProfileServiceProtocol = ProfileService.profileService
+        profileService: ProfileServiceProtocol = ProfileService.profileService,
+        profileLogoutService: ProfileLogoutServiceProtocol = ProfileLogoutService.shared
     ) {
         self.imageService = imageService
         self.profileService = profileService
+        self.profileLogoutService = profileLogoutService
     }
     
     func viewDidLoad() {
@@ -71,7 +74,7 @@ final class ProfilePresenter: ProfilePresenterProtocol {
     
     func confirmLogout() {
         view?.showBlockingHUD(true)
-        ProfileLogoutService.shared.logout()
+        profileLogoutService.logout()
         view?.clearProfileUI()
         view?.showBlockingHUD(false)
         view?.switchToSplashRoot()
