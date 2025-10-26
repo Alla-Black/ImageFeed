@@ -156,6 +156,26 @@ final class ProfileViewTests: XCTestCase {
         XCTAssertEqual(viewSpy.setAvatarCallCount, 1)
     }
     
+    func testPresenterReceivesAvatarUpdateViaNotification() {
+        //given
+        let imageStub = ProfileImageServiceStub()
+        
+        let presenter = ProfilePresenter(imageService: imageStub)
+        let viewSpy = ProfileViewControllerSpy()
+        
+        presenter.view = viewSpy
+        presenter.viewDidLoad()
+        
+        //when
+        NotificationCenter.default.post(
+            name: imageStub.didChangeNotification,
+            object: nil,
+            userInfo: ["URL": "https://new.url"]
+        )
+        
+        //then
+        XCTAssertEqual(viewSpy.receivedURL, "https://new.url")
+    }
     
 }
 
