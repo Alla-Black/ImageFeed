@@ -1,5 +1,10 @@
 import Foundation
 
+public protocol ProfileImageServiceProtocol {
+    var avatarURL: String? { get }
+    var didChangeNotification: Notification.Name { get }
+}
+
 struct ProfileImage: Codable {
     let small: String
 }
@@ -91,5 +96,10 @@ final class ProfileImageService {
     }
 }
 
+//MARK: - ProfileImageServiceProtocol
+
+extension ProfileImageService: ProfileImageServiceProtocol {
+    public var didChangeNotification: Notification.Name { Self.didChangeNotification }
+}
 
 

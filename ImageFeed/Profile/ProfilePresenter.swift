@@ -12,11 +12,17 @@ final class ProfilePresenter: ProfilePresenterProtocol {
     weak var view: ProfileViewControllerProtocol?
     private var imageObserver: NSObjectProtocol?
     
+    private let imageService: ProfileImageServiceProtocol
+    
+    init(imageService: ProfileImageServiceProtocol = ProfileImageService.shared) {
+        self.imageService = imageService
+    }
+    
     func viewDidLoad() {
         view?.showLoadingSkeleton()
         
         imageObserver = NotificationCenter.default.addObserver(
-            forName: ProfileImageService.didChangeNotification,
+            forName: imageService.didChangeNotification,
             object: nil,
             queue: .main
         ) {
@@ -29,7 +35,7 @@ final class ProfilePresenter: ProfilePresenterProtocol {
             self.view?.setAvatar(urlString: urlString)
         }
         
-        if let url = ProfileImageService.shared.avatarURL {
+        if let url = imageService.avatarURL {
             DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) { [weak self] in
                 self?.view?.setAvatar(urlString: url)
             }
