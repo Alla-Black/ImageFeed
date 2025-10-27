@@ -140,6 +140,29 @@ final class ImageViewTests: XCTestCase {
         XCTAssertEqual(viewSpy.updatedLikes.first?.0, IndexPath(row: 0, section: 0))
         XCTAssertEqual(viewSpy.updatedLikes.first?.1, true)
     }
+    
+    func testDidTapLikeFailureShowsErrorAndHidesHUD() {
+        //given
+        let imagesStub = ImagesListServiceStub()
+        imagesStub.shouldFailChangeLike = true
+
+        let viewSpy = ImagesListViewControllerSpy()
+        let presenter = ImagesListPresenter(imagesService: imagesStub)
+        presenter.view = viewSpy
+        
+        //when
+        presenter.didTapLike(at: IndexPath(row: 0, section: 0))
+        
+        let exp = expectation(description: "like failure handled")
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) { exp.fulfill() }
+        wait(for: [exp], timeout: 1.0)
+        
+        //then
+        XCTAssertEqual(viewSpy.hudCalls, [true, false], "HUD должен быть показан и скрыт")
+        XCTAssertTrue(viewSpy.showErrorCalled, "При ошибке должен показываться алерт с ошибкой")
+        XCTAssertEqual(viewSpy.updatedLikes.count, 0, "Лайк не должен обновляться при ошибке")
+        XCTAssertEqual(viewSpy.setPhotosCallCount, 0, "setPhotos не должен вызываться при ошибке")
+    }
 }
 
 class ImagesListViewControllerSpy: ImagesListViewControllerProtocol {
@@ -150,6 +173,7 @@ class ImagesListViewControllerSpy: ImagesListViewControllerProtocol {
     var hudCalls: [Bool] = []
     var setPhotosCallCount = 0
     var updatedLikes: [(IndexPath, Bool)] = []
+    var showErrorCalled = false
     
     func insertRows(at indexPaths: [IndexPath]) {
         insertRowsCalled = true
@@ -160,7 +184,7 @@ class ImagesListViewControllerSpy: ImagesListViewControllerProtocol {
     }
     
     func showError(message: String) {
-        
+        showErrorCalled = true
     }
     
     func showBlockingHUD(_ show: Bool) {
@@ -198,6 +222,9 @@ class ImagesListPresenterSpy: ImagesListPresenterProtocol {
 }
 
 class ImagesListServiceStub: ImagesListServiceProtocol {
+    var shouldFailChangeLike = false
+    enum StubError: Error { case likeFailed }
+    
     var photos: [Photo] = [
         Photo(id: "1",
               size: CGSize(width: 100, height: 100),
@@ -253,6 +280,12 @@ class ImagesListServiceStub: ImagesListServiceProtocol {
     }
     
     func changeLike(photoId: String, isLike: Bool, _ completion: @escaping (Result<Void, Error>) -> Void) {
+        
+        if shouldFailChangeLike {
+            return DispatchQueue.main.async {
+                completion(.failure(StubError.likeFailed))
+            }
+        }
         
         if let index = photos.firstIndex(where: { $0.id == photoId }) {
             
