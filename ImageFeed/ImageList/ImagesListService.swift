@@ -1,6 +1,14 @@
 import Foundation
 import CoreGraphics
 
+protocol ImagesListServiceProtocol: AnyObject {
+    var photos: [Photo] { get }
+    static var didChangeNotification: Notification.Name { get }
+    
+    func fetchPhotosNextPage()
+    func changeLike(photoId: String, isLike: Bool, _ completion: @escaping (Result<Void, Error>) -> Void)
+}
+
 struct Photo {
     let id: String
     let size: CGSize
@@ -283,3 +291,6 @@ final class ImagesListService {
         }
     }
 }
+
+//MARK: - ImagesListServiceProtocol
+extension ImagesListService: ImagesListServiceProtocol {}
