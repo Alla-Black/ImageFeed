@@ -36,6 +36,26 @@ final class ImageViewTests: XCTestCase {
         XCTAssertTrue(presenterSpy.willDisplayCalled)
         XCTAssertEqual(presenterSpy.receivedIndexPath, IndexPath(row:3, section: 0))
     }
+    
+    func testWillDisplayCellCallsFetchNextPageWhenLastCell() {
+        //given
+        let imagesStub = ImagesListServiceStub()
+        
+        let presenter = ImagesListPresenter(imagesService: imagesStub)
+        
+        //when
+        presenter.willDisplayCell(at: IndexPath(row: 2, section: 0))
+        
+        //then
+        XCTAssertEqual(imagesStub.fetchNextPageCallCount, 0)
+        
+        //when
+        presenter.willDisplayCell(at: IndexPath(row: 4, section: 0))
+        
+        //then
+        XCTAssertEqual(imagesStub.fetchNextPageCallCount, 1)
+        
+    }
 }
 
 class ImagesListPresenterSpy: ImagesListPresenterProtocol {
@@ -54,6 +74,66 @@ class ImagesListPresenterSpy: ImagesListPresenterProtocol {
     }
     
     func didTapLike(at indexPath: IndexPath) {
+        
+    }
+}
+
+class ImagesListServiceStub: ImagesListServiceProtocol {
+    var photos: [Photo] = [
+        Photo(id: "1",
+              size: CGSize(width: 100, height: 100),
+              createdAt: Date(),
+              welcomeDescription: nil,
+              thumbImageURL: "",
+              largeImageURL: "",
+              fullImageURL: "",
+              isLiked: false),
+        
+        Photo(id: "2",
+              size: CGSize(width: 100, height: 100),
+              createdAt: Date(),
+              welcomeDescription: nil,
+              thumbImageURL: "",
+              largeImageURL: "",
+              fullImageURL: "",
+              isLiked: false),
+        
+        Photo(id: "3",
+              size: CGSize(width: 100, height: 100),
+              createdAt: Date(),
+              welcomeDescription: nil,
+              thumbImageURL: "",
+              largeImageURL: "",
+              fullImageURL: "",
+              isLiked: false),
+        
+        Photo(id: "4",
+              size: CGSize(width: 100, height: 100),
+              createdAt: Date(),
+              welcomeDescription: nil,
+              thumbImageURL: "",
+              largeImageURL: "",
+              fullImageURL: "",
+              isLiked: false),
+        
+        Photo(id: "5",
+              size: CGSize(width: 100, height: 100),
+              createdAt: Date(),
+              welcomeDescription: nil,
+              thumbImageURL: "",
+              largeImageURL: "",
+              fullImageURL: "",
+              isLiked: false)
+    ]
+    
+    static var didChangeNotification = Notification.Name("ImagesListServiceStub.didChange")
+    var fetchNextPageCallCount = 0
+    
+    func fetchPhotosNextPage() {
+        fetchNextPageCallCount += 1
+    }
+    
+    func changeLike(photoId: String, isLike: Bool, _ completion: @escaping (Result<Void, Error>) -> Void) {
         
     }
 }
