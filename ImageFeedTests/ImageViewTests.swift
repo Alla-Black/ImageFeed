@@ -56,6 +56,56 @@ final class ImageViewTests: XCTestCase {
         XCTAssertEqual(imagesStub.fetchNextPageCallCount, 1)
         
     }
+    
+    func testHandlePhotosUpdateCallsSetPhotosAndInsertRows() {
+        //given
+        let viewSpy = ImagesListViewControllerSpy()
+        let imagesStub = ImagesListServiceStub()
+        let presenter = ImagesListPresenter(imagesService: imagesStub)
+        presenter.view = viewSpy
+        
+        //when
+        presenter.viewDidLoad()
+        
+        NotificationCenter.default.post(
+            name: type(of: imagesStub).didChangeNotification,
+            object: imagesStub
+        )
+        
+        //then
+        XCTAssertTrue(viewSpy.setPhotosCalled)
+        XCTAssertTrue(viewSpy.insertRowsCalled)
+    }
+}
+
+class ImagesListViewControllerSpy: ImagesListViewControllerProtocol {
+    var presenter: ImagesListPresenterProtocol?
+    var setPhotosCalled: Bool = false
+    var insertRowsCalled: Bool = false
+    
+    func insertRows(at indexPaths: [IndexPath]) {
+        insertRowsCalled = true
+    }
+    
+    func reloadAll() {
+        
+    }
+    
+    func showError(message: String) {
+        
+    }
+    
+    func showBlockingHUD(_ show: Bool) {
+        
+    }
+    
+    func updateLike(at indexPath: IndexPath, isLiked: Bool) {
+        
+    }
+    
+    func setPhotos(_ photos: [Photo]) {
+        setPhotosCalled = true
+    }
 }
 
 class ImagesListPresenterSpy: ImagesListPresenterProtocol {
