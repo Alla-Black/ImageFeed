@@ -163,6 +163,31 @@ final class ImageViewTests: XCTestCase {
         XCTAssertEqual(viewSpy.updatedLikes.count, 0, "Лайк не должен обновляться при ошибке")
         XCTAssertEqual(viewSpy.setPhotosCallCount, 0, "setPhotos не должен вызываться при ошибке")
     }
+    
+    func testDateFormatterFormatsDateAndHandlesNil() {
+        // given
+        let helper = ImagesListDateFormatter()
+        var calendar = Calendar(identifier: .gregorian)
+        calendar.timeZone = TimeZone(secondsFromGMT: 0)!
+
+        let components = DateComponents(year: 2025, month: 10, day: 27, hour: 12, minute: 34)
+        let date = calendar.date(from: components)!
+        
+        // when
+        let formatted = helper.text(from: date)
+        let nilFormatted = helper.text(from: nil)
+        
+        // then
+        XCTAssertNotNil(formatted, "Форматтер должен возвращать строку для валидной даты")
+        XCTAssertTrue(formatted.contains("27"), "Формат должен содержать день месяца")
+        XCTAssertTrue(formatted.contains("2025"), "Формат должен содержать год")
+        
+        let lower = formatted.lowercased()
+        XCTAssertTrue(lower.contains("окт") || lower.contains("oct"),
+                      "Формат должен содержать месяц")
+        XCTAssertTrue(nilFormatted.isEmpty || nilFormatted == "—",
+                      "При nil форматтер должен возвращать пустую строку или плейсхолдер")
+    }
 }
 
 class ImagesListViewControllerSpy: ImagesListViewControllerProtocol {
