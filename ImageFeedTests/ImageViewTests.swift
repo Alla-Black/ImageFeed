@@ -76,19 +76,62 @@ final class ImageViewTests: XCTestCase {
         XCTAssertTrue(viewSpy.setPhotosCalled)
         XCTAssertTrue(viewSpy.insertRowsCalled)
     }
+    
+    func testHandlePhotosUpdateReloadsAllWhenCountDecreases() {
+        //given
+        let imagesStub = ImagesListServiceStub()
+        let viewSpy = ImagesListViewControllerSpy()
+        let presenter = ImagesListPresenter(imagesService: imagesStub)
+        presenter.view = viewSpy
+        
+        //when
+        presenter.viewDidLoad()
+        NotificationCenter.default.post(
+            name: type(of: imagesStub).didChangeNotification,
+            object: imagesStub
+        )
+        
+        let firstExp = expectation(description: "first notification handled")
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
+            firstExp.fulfill()
+        }
+        wait(for: [firstExp], timeout: 1.0)
+        
+        viewSpy.setPhotosCalled = false
+        viewSpy.insertRowsCalled = false
+        viewSpy.reloadAllCalled = false
+        
+        imagesStub.photos = Array(imagesStub.photos.prefix(3))
+        
+        NotificationCenter.default.post(
+            name: type(of: imagesStub).didChangeNotification,
+            object: imagesStub)
+        
+        let secondExp = expectation(description: "second notification handled")
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
+            secondExp.fulfill()
+        }
+        wait(for: [secondExp], timeout: 1.0)
+        
+        //then
+        XCTAssertTrue(viewSpy.reloadAllCalled, "При уменьшении фото должен вызываться reloadAll()")
+        XCTAssertFalse(viewSpy.insertRowsCalled, "insertRows() не должен вызываться при уменьшении")
+        XCTAssertTrue(viewSpy.setPhotosCalled, "setPhotos() должен быть вызван для обновления списка фото")
+    }
 }
 
 class ImagesListViewControllerSpy: ImagesListViewControllerProtocol {
     var presenter: ImagesListPresenterProtocol?
     var setPhotosCalled: Bool = false
     var insertRowsCalled: Bool = false
+    var reloadAllCalled: Bool = false
     
     func insertRows(at indexPaths: [IndexPath]) {
         insertRowsCalled = true
     }
     
     func reloadAll() {
-        
+        reloadAllCalled = true
     }
     
     func showError(message: String) {
