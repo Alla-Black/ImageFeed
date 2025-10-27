@@ -118,6 +118,28 @@ final class ImageViewTests: XCTestCase {
         XCTAssertFalse(viewSpy.insertRowsCalled, "insertRows() не должен вызываться при уменьшении")
         XCTAssertTrue(viewSpy.setPhotosCalled, "setPhotos() должен быть вызван для обновления списка фото")
     }
+    
+    func testDidTapLikeSuccessUpdatesViewAndHidesHUD() {
+        //given
+        let imagesStub = ImagesListServiceStub()
+        let viewSpy = ImagesListViewControllerSpy()
+        let presenter = ImagesListPresenter(imagesService: imagesStub)
+        presenter.view = viewSpy
+        
+        //when
+        presenter.didTapLike(at: IndexPath(row: 0, section: 0))
+        
+        let exp = expectation(description: "like success handled")
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) { exp.fulfill() }
+        wait(for: [exp], timeout: 1.0)
+        
+        //then
+        XCTAssertEqual(viewSpy.hudCalls, [true, false])
+        XCTAssertEqual(viewSpy.setPhotosCallCount, 1)
+        XCTAssertEqual(viewSpy.updatedLikes.count, 1)
+        XCTAssertEqual(viewSpy.updatedLikes.first?.0, IndexPath(row: 0, section: 0))
+        XCTAssertEqual(viewSpy.updatedLikes.first?.1, true)
+    }
 }
 
 class ImagesListViewControllerSpy: ImagesListViewControllerProtocol {
@@ -125,6 +147,9 @@ class ImagesListViewControllerSpy: ImagesListViewControllerProtocol {
     var setPhotosCalled: Bool = false
     var insertRowsCalled: Bool = false
     var reloadAllCalled: Bool = false
+    var hudCalls: [Bool] = []
+    var setPhotosCallCount = 0
+    var updatedLikes: [(IndexPath, Bool)] = []
     
     func insertRows(at indexPaths: [IndexPath]) {
         insertRowsCalled = true
@@ -139,15 +164,16 @@ class ImagesListViewControllerSpy: ImagesListViewControllerProtocol {
     }
     
     func showBlockingHUD(_ show: Bool) {
-        
+        hudCalls.append(show)
     }
     
     func updateLike(at indexPath: IndexPath, isLiked: Bool) {
-        
+        updatedLikes.append((indexPath, isLiked))
     }
     
     func setPhotos(_ photos: [Photo]) {
         setPhotosCalled = true
+        setPhotosCallCount += 1
     }
 }
 
@@ -228,5 +254,26 @@ class ImagesListServiceStub: ImagesListServiceProtocol {
     
     func changeLike(photoId: String, isLike: Bool, _ completion: @escaping (Result<Void, Error>) -> Void) {
         
+        if let index = photos.firstIndex(where: { $0.id == photoId }) {
+            
+            var updatedPhoto = photos[index]
+            
+            updatedPhoto = Photo(
+                id: updatedPhoto.id,
+                size: updatedPhoto.size,
+                createdAt: updatedPhoto.createdAt,
+                welcomeDescription: updatedPhoto.welcomeDescription,
+                thumbImageURL: updatedPhoto.thumbImageURL,
+                largeImageURL: updatedPhoto.largeImageURL,
+                fullImageURL: updatedPhoto.fullImageURL,
+                isLiked: isLike
+            )
+            
+            photos[index] = updatedPhoto
+        }
+        
+        DispatchQueue.main.async {
+            completion(.success(()))
+        }
     }
 }
