@@ -39,6 +39,10 @@ final class ProfileViewController: UIViewController {
         
         addViewsToScreen()
         
+        nameLabel?.accessibilityIdentifier = "profile_name"
+        loginName?.accessibilityIdentifier = "profile_login"
+        logoutButton?.accessibilityIdentifier = "profile_logout_button"
+        
         presenter?.viewDidLoad()
     }
     

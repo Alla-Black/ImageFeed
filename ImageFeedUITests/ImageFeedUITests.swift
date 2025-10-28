@@ -26,7 +26,7 @@ final class ImageFeedUITests: XCTestCase {
         
         loginTextField.tap()
         XCTAssertTrue(app.keyboards.firstMatch.waitForExistence(timeout: 5))
-        loginTextField.typeText("Ваш e-mail")
+        loginTextField.typeText("ваш e-mail")
         
         print(app.debugDescription)
         
@@ -53,7 +53,7 @@ final class ImageFeedUITests: XCTestCase {
             passwordTextField.tap() // повторный тап, если клавиатура не поднялась с первого раза
         }
         XCTAssertTrue(app.keyboards.firstMatch.waitForExistence(timeout: 5))
-        passwordTextField.typeText("Ваш пароль")
+        passwordTextField.typeText("ваш пароль")
         
         closeKeyboard()
         
@@ -115,6 +115,22 @@ final class ImageFeedUITests: XCTestCase {
     }
     
     func testProfile() throws {
-        // тестируем сценарий профил
+        // Подождать, пока открывается и загружается экран ленты
+        sleep(3)
+        
+        // Перейти на экран профиля
+        app.tabBars.buttons.element(boundBy: 1).tap()
+        
+        // Проверить, что на нём отображаются ваши персональные данные
+        XCTAssertTrue(app.staticTexts["profile_name"].exists)
+        XCTAssertTrue(app.staticTexts["profile_login"].exists)
+        
+        // Нажать кнопку логаута
+        app.buttons["profile_logout_button"].tap()
+        
+        // Проверить, что открылся экран авторизации
+        let alert = app.alerts["Пока, пока!"]
+        XCTAssertTrue(alert.waitForExistence(timeout: 5))
+        alert.scrollViews.otherElements.buttons["Да"].tap()
     }
 }
