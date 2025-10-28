@@ -20,6 +20,8 @@ final class ImagesListPresenter: ImagesListPresenterProtocol {
         self.imagesService = imagesService
     }
     
+    private let isUITesting = ProcessInfo.processInfo.arguments.contains("-uiTesting")
+    
     func viewDidLoad() {
         imagesObserver = NotificationCenter.default.addObserver(
             forName: type(of: imagesService).didChangeNotification,
@@ -35,6 +37,8 @@ final class ImagesListPresenter: ImagesListPresenterProtocol {
     }
     
     func willDisplayCell(at indexPath: IndexPath) {
+        if isUITesting { return }
+        
         let count = imagesService.photos.count
         if indexPath.row + 1 == count {
             imagesService.fetchPhotosNextPage()

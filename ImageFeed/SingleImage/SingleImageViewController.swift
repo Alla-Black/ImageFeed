@@ -33,6 +33,8 @@ final class SingleImageViewController: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         
+        backButton.accessibilityIdentifier = "backButton"
+        
         scrollView.delegate = self
         
         if fullImageURL != nil {

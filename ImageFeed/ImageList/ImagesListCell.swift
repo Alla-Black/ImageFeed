@@ -17,6 +17,8 @@ final class ImagesListCell: UITableViewCell {
     override func awakeFromNib() {
         super.awakeFromNib()
         
+        likeButton.accessibilityIdentifier = "like_button"
+        
         dataLabel.font = UIFont.systemFont(ofSize: 13, weight: .regular)
         dataLabel.textColor = UIColor(resource: .ypWhite)
         
