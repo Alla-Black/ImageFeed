@@ -1,0 +1,100 @@
+import Foundation
+
+// MARK: - OAuthTokenResponseBody
+
+struct OAuthTokenResponseBody: Decodable {
+    var accessToken: String
+    
+    enum CodingKeys: String, CodingKey {
+        case accessToken = "access_token"
+    }
+}
+
+// MARK: - OAuth2Service
+
+final class OAuth2Service {
+    
+    // MARK: - Singleton
+    static let shared = OAuth2Service()
+    private init() {}
+    
+    // MARK: - Private Properties
+    private var task: URLSessionTask?
+    private var lastCode: String?
+    private let storage = OAuth2TokenStorage.shared
+    
+    // MARK: - Public Methods
+    
+    func fetchAuthToken(code: String, completion: @escaping (Result<String, Error>) -> Void) {
+        assert(Thread.isMainThread)
+        
+        if lastCode == code {
+            completion(.failure(NetworkError.invalidRequest))
+            return
+        }
+        
+        if task != nil {
+            task?.cancel()
+        }
+        
+        lastCode = code
+        
+        guard let request = makeOAuthTokenRequest(code: code) else {
+            completion(.failure(NetworkError.invalidRequest))
+            lastCode = nil
+            return
+        }
+        
+        let task = URLSession.shared.objectTask(for: request) { [weak self] (result: Result<OAuthTokenResponseBody, Error>) in
+            guard let self else { return }
+            
+            switch result {
+            case .success(let data):
+                
+                print(data.accessToken)
+                
+                self.storage.token = data.accessToken
+                completion(.success(data.accessToken))
+                
+                self.task = nil
+                self.lastCode = nil
+                
+            case .failure(let error):
+                print("[OAuth2Service]: failure - code: \(code) - reason: \(error.localizedDescription)")
+                completion(.failure(error))
+                
+                self.task = nil
+                self.lastCode = nil
+            }
+        }
+    
+            self.task = task
+            task.resume()
+        }
+    
+    // MARK: - Private Methods
+    
+    private func makeOAuthTokenRequest(code: String) -> URLRequest? {
+        var urlComponents = URLComponents()
+        urlComponents.scheme = Constants.defaultScheme
+        urlComponents.host = Constants.defaultHost
+        urlComponents.path = Constants.oauthPath
+        
+        urlComponents.queryItems = [
+            URLQueryItem(name: "client_id", value: Constants.accessKey),
+            URLQueryItem(name: "client_secret", value: Constants.secretKey),
+            URLQueryItem(name: "redirect_uri", value: Constants.redirectURI),
+            URLQueryItem(name: "code", value: code),
+            URLQueryItem(name: "grant_type", value: "authorization_code")
+        ]
+        
+        guard let authTokenUrl = urlComponents.url else { return nil }
+        
+        var request = URLRequest(url: authTokenUrl)
+        request.httpMethod = HTTPMethod.post.rawValue
+        
+        return request
+    }
+    
+}
+
