@@ -3,35 +3,35 @@ import XCTest
 
 final class ProfileViewTests: XCTestCase {
     func testProfileViewControllerCallsViewDidLoad() {
-        //given
+        //Given
         let sut = ProfileViewController()
         let presenter = ProfilePresenterSpy()
         
         sut.configure(presenter)
         
-        //when
+        //When
         sut.viewDidLoad()
         
-        //then
+        //Then
         XCTAssertTrue(presenter.viewDidLoadCalled)
     }
     
     func testPresenterCallsShowLoadingSkeleton() {
-        //given
+        //Given
         let presenter = ProfilePresenter()
         let viewSpy = ProfileViewControllerSpy()
         
         presenter.view = viewSpy
         
-        //when
+        //When
         presenter.viewDidLoad()
         
-        //then
+        //Then
         XCTAssertTrue(viewSpy.showLoadingSkeletonCalled)
     }
     
     func testPresenterCallsSetAvatar() {
-        //given
+        //Given
         let imageStub = ProfileImageServiceStub()
         imageStub.avatarURL = "https://example.com/avatar.png"
         
@@ -39,10 +39,10 @@ final class ProfileViewTests: XCTestCase {
         let viewSpy = ProfileViewControllerSpy()
         presenter.view = viewSpy
         
-        //when
+        //When
         presenter.viewDidLoad()
         
-        // then
+        //Then
         let exp = expectation(description: "wait for setAvatar")
         DispatchQueue.main.asyncAfter(deadline: .now() + 0.6) {
             exp.fulfill()
@@ -54,7 +54,7 @@ final class ProfileViewTests: XCTestCase {
     }
     
     func testPresenterCallsSetProfile() {
-        //given
+        //Given
         let profileStub = ProfileServiceStub()
         profileStub.profile = Profile(
             username: "testUser",
@@ -67,10 +67,10 @@ final class ProfileViewTests: XCTestCase {
         let viewSpy = ProfileViewControllerSpy()
         presenter.view = viewSpy
         
-        //when
+        //When
         presenter.viewDidLoad()
         
-        //then
+        //Then
         let exp = expectation(description: "wait setProfile")
         DispatchQueue.main.asyncAfter(deadline: .now() + 0.6) {
             exp.fulfill()
@@ -84,7 +84,7 @@ final class ProfileViewTests: XCTestCase {
     }
     
     func testPresenterHideLoadingSkeleton() {
-        //given
+        //Given
         let profileStub = ProfileServiceStub()
         profileStub.profile = Profile(
             username: "testUser",
@@ -97,10 +97,10 @@ final class ProfileViewTests: XCTestCase {
         let viewSpy = ProfileViewControllerSpy()
         presenter.view = viewSpy
         
-        //when
+        //When
         presenter.viewDidLoad()
         
-        //then
+        //Then
         let exp = expectation(description: "wait hideLoadingSkeleton")
         DispatchQueue.main.asyncAfter(deadline: .now() + 0.6) {
             exp.fulfill()
@@ -111,29 +111,29 @@ final class ProfileViewTests: XCTestCase {
     }
     
     func testPresenterShowLogoutAlert() {
-        //given
+        //Given
         let presenter = ProfilePresenter()
         let viewSpy = ProfileViewControllerSpy()
         presenter.view = viewSpy
         
-        //when
+        //When
         presenter.didTapLogout()
         
-        //then
+        //Then
         XCTAssertTrue(viewSpy.showLogoutAlertCalled)
     }
     
     func testPresenterConfirmLogoutCallsAllExpectedActions() {
-        // given
+        // Given
         let logoutSpy = ProfileLogoutServiceSpy()
         let viewSpy = ProfileViewControllerSpy()
         let presenter = ProfilePresenter(profileLogoutService: logoutSpy)
         presenter.view = viewSpy
         
-        // when
+        // When
         presenter.confirmLogout()
         
-        // then
+        // Then
         XCTAssertEqual(viewSpy.showBlockingHUDCalls, [true, false])
         XCTAssertTrue(logoutSpy.logoutCalled)
         XCTAssertTrue(viewSpy.clearProfileUICalled)
@@ -141,23 +141,23 @@ final class ProfileViewTests: XCTestCase {
     }
     
     func testPresenterSetsNilAvatarWhenNoURL() {
-        //given
+        //Given
         let imageStub = ProfileImageServiceStub()
         let presenter = ProfilePresenter(imageService: imageStub)
         
         let viewSpy = ProfileViewControllerSpy(); presenter.view = viewSpy
         
-        //when
+        //When
         presenter.viewDidLoad()
         
-        //then
+        //Then
         XCTAssertTrue(viewSpy.setAvatarCalled)
         XCTAssertNil(viewSpy.receivedURL)
         XCTAssertEqual(viewSpy.setAvatarCallCount, 1)
     }
     
     func testPresenterReceivesAvatarUpdateViaNotification() {
-        //given
+        //Given
         let imageStub = ProfileImageServiceStub()
         
         let presenter = ProfilePresenter(imageService: imageStub)
@@ -166,19 +166,19 @@ final class ProfileViewTests: XCTestCase {
         presenter.view = viewSpy
         presenter.viewDidLoad()
         
-        //when
+        //When
         NotificationCenter.default.post(
             name: imageStub.didChangeNotification,
             object: nil,
             userInfo: ["URL": "https://new.url"]
         )
         
-        //then
+        //Then
         XCTAssertEqual(viewSpy.receivedURL, "https://new.url")
     }
     
     func testPresenterFormatsEmptyProfileFieldsWithPlaceholders() {
-        // given
+        // Given
         let profileStub = ProfileServiceStub()
         profileStub.profile = Profile(
             username: "testUser",
@@ -191,10 +191,10 @@ final class ProfileViewTests: XCTestCase {
         let viewSpy = ProfileViewControllerSpy()
         presenter.view = viewSpy
         
-        // when
+        // When
         presenter.viewDidLoad()
         
-        // then
+        // Then
         let exp = expectation(description: "wait placeholders")
         DispatchQueue.main.asyncAfter(deadline: .now() + 0.6) {
             exp.fulfill()
@@ -206,93 +206,4 @@ final class ProfileViewTests: XCTestCase {
         XCTAssertEqual(viewSpy.receivedBio, "Профиль не заполнен")
     }
     
-}
-
-final class ProfilePresenterSpy: ProfilePresenterProtocol {
-    var view: ProfileViewControllerProtocol?
-    var viewDidLoadCalled: Bool = false
-    
-    func viewDidLoad() {
-        viewDidLoadCalled = true
-    }
-    
-    func didTapLogout() {
-        
-    }
-    
-    func confirmLogout() {
-        
-    }
-}
-
-final class ProfileViewControllerSpy: ProfileViewControllerProtocol {
-    var presenter: ProfilePresenterProtocol?
-    var showLoadingSkeletonCalled: Bool = false
-    var setAvatarCalled: Bool = false
-    var receivedURL: String?
-    var setProfileCalled = false
-    var receivedName: String?
-    var receivedLogin: String?
-    var receivedBio: String?
-    var hideLoadingSkeletonCalled: Bool = false
-    var showLogoutAlertCalled: Bool = false
-    var showBlockingHUDCalls: [Bool] = []
-    var clearProfileUICalled = false
-    var switchToSplashRootCalled = false
-    var setAvatarCallCount = 0
-    
-    func setProfile(name: String?, login: String?, bio: String?) {
-        setProfileCalled = true
-        receivedName = name
-        receivedLogin = login
-        receivedBio = bio
-        
-    }
-    
-    func setAvatar(urlString: String?) {
-        setAvatarCalled = true
-        receivedURL = urlString
-        setAvatarCallCount += 1
-    }
-    
-    func showLogoutAlert() {
-        showLogoutAlertCalled = true
-    }
-    
-    func showBlockingHUD(_ show: Bool) {
-        showBlockingHUDCalls.append(show)
-    }
-    
-    func clearProfileUI() {
-        clearProfileUICalled = true
-    }
-    
-    func switchToSplashRoot() {
-        switchToSplashRootCalled = true
-    }
-    
-    func showLoadingSkeleton() {
-        showLoadingSkeletonCalled = true
-    }
-    
-    func hideLoadingSkeleton() {
-        hideLoadingSkeletonCalled = true
-    }
-}
-
-final class ProfileImageServiceStub: ProfileImageServiceProtocol {
-    var avatarURL: String?
-    let didChangeNotification = Notification.Name("ProfileImageServiceStub.didChange")
-}
-
-final class ProfileServiceStub: ProfileServiceProtocol {
-    var profile: Profile?
-}
-
-final class ProfileLogoutServiceSpy: ProfileLogoutServiceProtocol {
-    var logoutCalled: Bool = false
-    
-    func logout() {
-        logoutCalled = true
-    }
 }

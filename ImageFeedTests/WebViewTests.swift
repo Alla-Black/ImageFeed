@@ -1,12 +1,9 @@
-import Testing
-import ImageFeed
-import Foundation
-@testable import ImageFeed
 import XCTest
+@testable import ImageFeed
 
 final class WebViewTests: XCTestCase {
     func testViewControllerCallsViewDidLoad() {
-        //given
+        //Given
         let storyboard = UIStoryboard(name: "Main", bundle: nil)
         let viewController = storyboard.instantiateViewController(withIdentifier: "WebViewViewController") as! WebViewViewController
         let presenter = WebViewPresenterSpy()
@@ -14,60 +11,60 @@ final class WebViewTests: XCTestCase {
         viewController.presenter = presenter
         presenter.view = viewController
         
-        //when
+        //When
         _ = viewController.view
         
-        //then
+        //Then
         XCTAssertTrue(presenter.viewDidLoadCalled)
     }
     
     func testPresenterCallsLoadRequest() {
-        //given
+        //Given
         let helper = AuthHelperStub()
         let presenter = WebViewPresenter(authHelper: helper)
         
         let webViewSpy = WebViewViewControllerSpy()
         presenter.view = webViewSpy
         
-        //when
+        //When
         presenter.viewDidLoad()
         
-        //then
+        //Then
         XCTAssertTrue(webViewSpy.loadRequestCalled)
     }
     
     func testProgressVisibleWhenLessThenOne() {
-        //given
+        //Given
         let helper = AuthHelperStub()
         let presenter = WebViewPresenter(authHelper: helper)
         let progress: Float = 0.6
         
-        //when
+        //When
         let shouldHideProgress = presenter.shouldHideProgress(for: progress)
         
-        //then
+        //Then
         XCTAssertFalse(shouldHideProgress)
     }
     
     func testProgressHiddenWhenOne() {
-        //given
+        //Given
         let helper = AuthHelperStub()
         let presenter = WebViewPresenter(authHelper: helper)
         let progress: Float = 1.0
         
-        //when
+        //When
         let shouldHideProgress = presenter.shouldHideProgress(for: progress)
         
-        //then
+        //Then
         XCTAssertTrue(shouldHideProgress)
     }
     
     func testAuthHelperAuthURL() {
-        //given
+        //Given
         let configuration = AuthConfiguration.standard
         let authHelper = AuthHelper(configuration: configuration)
         
-        //when
+        //When
         let url = authHelper.authURL()
         
         guard let urlString = url?.absoluteString else {
@@ -75,7 +72,7 @@ final class WebViewTests: XCTestCase {
             return
         }
         
-        //then
+        //Then
         XCTAssertTrue(urlString.contains(configuration.authURLString))
         XCTAssertTrue(urlString.contains(configuration.accessKey))
         XCTAssertTrue(urlString.contains(configuration.redirectURI))
@@ -84,7 +81,7 @@ final class WebViewTests: XCTestCase {
     }
     
     func testCodeFromURL() {
-        //given
+        //Given
         var urlComponents = URLComponents(string: "https://unsplash.com/oauth/authorize/native")!
         urlComponents.queryItems = [URLQueryItem(name: "code", value: "test code")]
         guard let url = urlComponents.url else {
@@ -93,54 +90,13 @@ final class WebViewTests: XCTestCase {
         }
         let authHelper = AuthHelper()
         
-        //when
+        //When
         let code = authHelper.code(from: url)
         
-        //then
+        //Then
         XCTAssertEqual(code, "test code")
     }
+    
 }
 
-final class WebViewPresenterSpy: WebViewPresenterProtocol {
-    var viewDidLoadCalled: Bool = false
-    var view: WebViewViewControllerProtocol?
-    
-    func viewDidLoad() {
-        viewDidLoadCalled = true
-    }
-    
-    func didUpdateProgressValue(_ newValue: Double) {
-        
-    }
-    
-    func code(from url: URL) -> String? {
-        return nil
-    }
-}
 
-final class WebViewViewControllerSpy: WebViewViewControllerProtocol {
-    var loadRequestCalled: Bool = false
-    var presenter: WebViewPresenterProtocol?
-    
-    func load(request: URLRequest) {
-        loadRequestCalled = true
-    }
-    func setProgressValue(_ newValue: Float) {
-        
-    }
-    func setProgressHidden(_ isHidden: Bool) {
-        
-    }
-}
-
-final class AuthHelperStub: AuthHelperProtocol {
-    func authRequest() -> URLRequest? {
-        guard let url = URL(string: "https://example.com") else { return nil }
-        
-        return URLRequest(url: url)
-    }
-    
-    func code(from url: URL) -> String? {
-        return nil
-    }
-}
